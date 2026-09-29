@@ -1,15 +1,23 @@
 {
+  "name": "Min Copy & Print",
   "short_name": "Min POS",
-  "name": "Min Copy & Print - Pro POS",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fdfaf5",
+  "theme_color": "#FF8C00",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "443.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "sizes": "192x192 512x512"
+      "purpose": "any maskable"
+    },
+    {
+      "src": "443.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ],
-  "start_url": "./index.html",
-  "background_color": "#fdfaf5",
-  "theme_color": "#FF8C00",
-  "display": "standalone"
+  ]
 }
