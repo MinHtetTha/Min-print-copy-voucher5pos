@@ -2,228 +2,316 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Min Print & Copy - POS System</title>
 
-    <!-- PWA & Offline Support -->
-    <link rel="manifest" href="manifest.json?v=4">
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json?v=5">
     <meta name="theme-color" content="#e67e22">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="443.png">
 
     <style>
+        :root {
+            --primary: #e67e22;
+            --primary-dark: #d35400;
+            --bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Pyidaungsu', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: #e67e22;
+            background-color: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 15px;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* 1. Splash Screen */
+        /* Splash Screen */
         #splash-screen {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #e67e22;
+            inset: 0;
+            background: var(--primary);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
-            padding: 20px;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
         }
 
-        .splash-logo-box {
-            width: 150px;
-            height: 150px;
-            background-color: #ffffff;
-            border-radius: 25px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
+        .splash-logo {
+            width: 120px;
+            height: 120px;
+            background: #fff;
+            border-radius: 20px;
+            padding: 10px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        .splash-logo-box img {
-            width: 100%;
-            height: 100%;
+            margin-bottom: 15px;
             object-fit: contain;
         }
 
-        .splash-text {
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: bold;
-            text-align: center;
-            line-height: 1.6;
+        /* Header Navigation */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        /* 2. Main POS Layout */
-        .pos-container {
-            max-width: 1100px;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .brand img {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: white;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .nav-btn.active {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Layout Container */
+        .container {
+            max-width: 1200px;
+            width: 100%;
             margin: 0 auto;
-            background: #f4f6f9;
-            padding: 20px;
-            border-radius: 15px;
+            padding: 15px;
+            flex: 1;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* POS Grid (Responsive) */
+        .pos-grid {
             display: grid;
             grid-template-columns: 1fr 380px;
-            gap: 20px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            color: #333;
+            gap: 15px;
         }
 
-        @media (max-width: 850px) {
-            .pos-container {
+        @media (max-width: 900px) {
+            .pos-grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        .card-pos {
-            background: #fff;
-            padding: 20px;
+        .card {
+            background: var(--card-bg);
+            padding: 18px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        .header-title {
-            color: #e67e22;
-            font-size: 18px;
+        .card-title {
+            font-size: 15px;
             font-weight: bold;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #e67e22;
+            color: var(--primary);
+            border-bottom: 2px solid var(--bg);
             padding-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .form-group {
             margin-bottom: 12px;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #555;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
+            margin-bottom: 10px;
         }
 
-        .btn-pos {
-            background: #e67e22;
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #666;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 12px;
+            padding: 10px 15px;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
-            margin-top: 10px;
-            font-size: 14px;
+            font-size: 13px;
             transition: 0.2s;
         }
 
-        .btn-pos:hover {
-            background: #d35400;
+        .btn-success { background: #27ae60; }
+        .btn-success:hover { background: #219150; }
+        .btn-danger { background: #e74c3c; }
+
+        /* Items Table */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 10px;
         }
 
-        .btn-add {
-            background: #27ae60;
-        }
-
-        .btn-add:hover {
-            background: #219150;
-        }
-
-        table.pos-table {
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
             font-size: 12px;
         }
 
-        table.pos-table th, table.pos-table td {
-            border: 1px solid #ddd;
+        th, td {
+            border: 1px solid #eee;
             padding: 8px;
             text-align: left;
         }
 
-        table.pos-table th {
-            background: #f8f9fa;
-        }
+        th { background: #f8f9fa; color: #555; }
 
-        /* 3. A6 Print Voucher Styling */
+        /* Voucher Slip Design (A6 Size) */
         .voucher-preview {
             width: 105mm;
             min-height: 148mm;
-            background: #fff;
-            padding: 8mm;
+            background: white;
+            padding: 6mm;
             margin: 0 auto;
-            border: 1px dashed #bbb;
+            border: 1px dashed #ccc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             font-size: 10px;
-            line-height: 1.4;
+            line-height: 1.3;
         }
 
-        .v-head {
+        .v-header {
             text-align: center;
             border-bottom: 1px dashed #000;
-            padding-bottom: 5px;
-            margin-bottom: 5px;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
         }
 
-        .v-head h3 {
-            font-size: 13px;
-            font-weight: bold;
+        .v-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            margin-bottom: 4px;
+        }
+
+        .v-header h3 { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+        .v-header p { font-size: 8px; color: #444; }
+
+        .v-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8.5px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 4px;
         }
 
         .v-table {
             width: 100%;
             border: none;
-            margin: 8px 0;
+            margin-bottom: 6px;
         }
 
         .v-table th, .v-table td {
             border: none;
-            border-bottom: 1px solid #eee;
-            padding: 4px 0;
-            font-size: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 3px 0;
+            font-size: 9px;
         }
 
+        .v-total {
+            border-top: 1px dashed #000;
+            padding-top: 4px;
+            text-align: right;
+            font-size: 9.5px;
+        }
+
+        .v-footer {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 8px;
+            color: #666;
+        }
+
+        /* History Cards */
+        .history-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        /* Print Override */
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            .voucher-preview, .voucher-preview * {
-                visibility: visible;
-            }
+            body * { visibility: hidden; }
+            .voucher-preview, .voucher-preview * { visibility: visible; }
             .voucher-preview {
                 position: absolute;
                 left: 0;
@@ -233,10 +321,7 @@
                 border: none;
                 padding: 4mm;
             }
-            @page {
-                size: 105mm 148mm;
-                margin: 0;
-            }
+            @page { size: 105mm 148mm; margin: 0; }
         }
     </style>
 </head>
@@ -244,141 +329,189 @@
 
     <!-- Splash Screen -->
     <div id="splash-screen">
-        <div class="splash-logo-box">
+        <img src="443.png" class="splash-logo" alt="Logo">
+        <div style="color: white; font-weight: bold;">MIN PRINT & COPY</div>
+        <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-top: 5px;">POS System ကို စတင်နေပါသည်...</div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="brand">
             <img src="443.png" alt="Logo">
+            <span>Min Print POS</span>
         </div>
-        <div class="splash-text">
-            MIN PRINT & COPY - POS
-            <div style="font-size: 13px; opacity: 0.9; margin-top: 5px;">
-                စနစ်ကို ပြင်ဆင်နေပါသည်...
+        <div class="nav-tabs">
+            <button class="nav-btn active" onclick="switchTab('posTab', this)">🖨️ အရောင်း</button>
+            <button class="nav-btn" onclick="switchTab('historyTab', this)">📜 မှတ်တမ်း</button>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <!-- TAB 1: POS Checkout -->
+        <div id="posTab" class="tab-content active">
+            <div class="pos-grid">
+                
+                <!-- Left Input Panel -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>ဝယ်ယူမှု အချက်အလက်</span>
+                        <span id="vNoBadge" style="font-size: 11px; background: #eee; padding: 2px 6px; border-radius: 4px; color: #333;">-</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Customer အမည်</label>
+                            <input type="text" id="custName" placeholder="General Customer">
+                        </div>
+                        <div class="form-group">
+                            <label>ဖုန်းနံပါတ်</label>
+                            <input type="text" id="custPhone" placeholder="09xxxxxxxxx">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>အကြောင်းအရာ / ဝန်ဆောင်မှု</label>
+                        <input type="text" id="itemDesc" placeholder="ဥပမာ - A4 Print / Photo / Binding">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>အရေအတွက် (Qty)</label>
+                            <input type="number" id="itemQty" value="1" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>ဈေးနှုန်း (Ks)</label>
+                            <input type="number" id="itemPrice" value="100">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" onclick="addItem()">+ စာရင်း ထည့်မည်</button>
+
+                    <div class="table-responsive">
+                        <table id="itemsTable">
+                            <thead>
+                                <tr>
+                                    <th>အကြောင်းအရာ</th>
+                                    <th>Qty</th>
+                                    <th>ဈေး</th>
+                                    <th>စုစုပေါင်း</th>
+                                    <th>#</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="form-row" style="margin-top: 12px;">
+                        <div class="form-group">
+                            <label>Discount (Ks)</label>
+                            <input type="number" id="discount" value="0" onchange="updateTotal()">
+                        </div>
+                        <div class="form-group">
+                            <label>ကျသင့်ငွေ စုစုပေါင်း</label>
+                            <input type="text" id="finalTotalDisplay" value="0 Ks" readonly style="font-weight: bold; color: var(--primary);">
+                        </div>
+                    </div>
+
+                    <button class="btn" onclick="saveAndPrint()" style="margin-top: 5px;">🖨️ Voucher Print ထုတ်ပြီး သိမ်းမည်</button>
+                </div>
+
+                <!-- Right Voucher Preview Panel -->
+                <div class="card" style="background: #eef2f5;">
+                    <div class="card-title">A6 Voucher Preview</div>
+                    
+                    <div class="voucher-preview" id="vPreview">
+                        <div class="v-header">
+                            <img src="443.png" class="v-logo" alt="Logo">
+                            <h3>MIN PRINT & COPY</h3>
+                            <p>မေခဆောင်(1B)၊ သမိုင်းကောလိပ်လမ်း၊ လှိုင်မြို့နယ်</p>
+                            <p>Ph: 09 964 563 388</p>
+                        </div>
+
+                        <div class="v-info">
+                            <div>
+                                <div><strong>Voucher:</strong> <span id="vNo"></span></div>
+                                <div><strong>Name:</strong> <span id="vCustName">General</span></div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div><strong>Date:</strong> <span id="vDate"></span></div>
+                                <div><strong>Phone:</strong> <span id="vCustPhone">-</span></div>
+                            </div>
+                        </div>
+
+                        <table class="v-table">
+                            <thead>
+                                <tr>
+                                    <th>အကြောင်းအရာ</th>
+                                    <th style="text-align: center;">Qty</th>
+                                    <th style="text-align: right;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vItems"></tbody>
+                        </table>
+
+                        <div class="v-total">
+                            <div>စုစုပေါင်း: <span id="vSubtotal">0</span> Ks</div>
+                            <div>Discount: <span id="vDiscount">0</span> Ks</div>
+                            <div style="font-size: 11px; margin-top: 2px;"><strong>ကျသင့်ငွေ: <span id="vGrandTotal">0</span> Ks</strong></div>
+                        </div>
+
+                        <div class="v-footer">
+                            <p>အားပေးမှုကို အထူးကျေးဇူးတင်ရှိပါသည်ခင်ဗျာ။</p>
+                            <p>✨ သာယာသောနေ့လေးဖြစ်ပါစေ ✨</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
+
+        <!-- TAB 2: Voucher History -->
+        <div id="historyTab" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span>📜 သိမ်းဆည်းထားသော Voucher မှတ်တမ်းများ</span>
+                    <button onclick="clearHistory()" class="btn btn-danger" style="width: auto; padding: 4px 10px; font-size: 11px;">မှတ်တမ်းအားလုံးဖျက်မည်</button>
+                </div>
+                <div id="historyList">
+                    <!-- History items will be loaded here -->
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Main POS Section -->
-    <div class="pos-container">
-        <!-- Input Form -->
-        <div class="card-pos">
-            <div class="header-title">🖨️ MIN PRINT & COPY - POS System</div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Customer အမည်</label>
-                    <input type="text" id="custName" placeholder="General Customer">
-                </div>
-                <div class="form-group">
-                    <label>ဖုန်းနံပါတ်</label>
-                    <input type="text" id="custPhone" placeholder="09xxxxxxxxx">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>အမျိုးအစား / ဝန်ဆောင်မှု</label>
-                <input type="text" id="itemDesc" placeholder="ဥပမာ - A4 Print / Photo / Binding">
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>အရေအတွက် (Qty)</label>
-                    <input type="number" id="itemQty" value="1" min="1">
-                </div>
-                <div class="form-group">
-                    <label>တစ်ရွက် / ခု ဈေး (Ks)</label>
-                    <input type="number" id="itemPrice" value="100">
-                </div>
-            </div>
-
-            <button class="btn-pos btn-add" onclick="addItem()">+ စာရင်း ထည့်မည်</button>
-
-            <table class="pos-table" id="itemsTable">
-                <thead>
-                    <tr>
-                        <th>အကြောင်းအရာ</th>
-                        <th>Qty</th>
-                        <th>ဈေး</th>
-                        <th>စုစုပေါင်း</th>
-                        <th>#</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-
-            <div class="form-row" style="margin-top: 12px;">
-                <div class="form-group">
-                    <label>Discount (Ks)</label>
-                    <input type="number" id="discount" value="0" onchange="updateTotal()">
-                </div>
-                <div class="form-group">
-                    <label>Voucher No.</label>
-                    <input type="text" id="voucherNo" readonly>
-                </div>
-            </div>
-
-            <button class="btn-pos" onclick="window.print()">🖨️ A6 Voucher Print ထုတ်မည်</button>
-        </div>
-
-        <!-- Voucher Preview -->
-        <div class="card-pos" style="background: #eef2f5;">
-            <div class="header-title" style="color: #333; border-color: #ccc;">📄 A6 Voucher Preview</div>
-            
-            <div class="voucher-preview" id="vPreview">
-                <div class="v-head">
-                    <h3>MIN PRINT & COPY</h3>
-                    <p>မေခဆောင်(1B)၊ သမိုင်းကောလိပ်လမ်း၊ လှိုင်မြို့နယ်</p>
-                    <p>Ph: 09 964 563 388</p>
-                </div>
-
-                <div style="margin-bottom: 5px; font-size: 9px;">
-                    <div><strong>Voucher:</strong> <span id="vNo"></span></div>
-                    <div><strong>Date:</strong> <span id="vDate"></span></div>
-                    <div><strong>Name:</strong> <span id="vCustName">General</span></div>
-                    <div><strong>Phone:</strong> <span id="vCustPhone">-</span></div>
-                </div>
-
-                <table class="v-table">
-                    <thead>
-                        <tr>
-                            <th>အကြောင်းအရာ</th>
-                            <th style="text-align: center;">Qty</th>
-                            <th style="text-align: right;">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody id="vItems"></tbody>
-                </table>
-
-                <div style="border-top: 1px dashed #000; padding-top: 4px; text-align: right; font-weight: bold; font-size: 10px;">
-                    <div>စုစုပေါင်း: <span id="vSubtotal">0</span> Ks</div>
-                    <div>Discount: <span id="vDiscount">0</span> Ks</div>
-                    <div style="font-size: 11px; margin-top: 2px;"><strong>ကျသင့်ငွေ: <span id="vGrandTotal">0</span> Ks</strong></div>
-                </div>
-
-                <div style="text-align: center; margin-top: 12px; font-size: 8px; color: #555;">
-                    <p>အားပေးမှုကို အထူးကျေးဇူးတင်ရှိပါသည်ခင်ဗျာ။</p>
-                    <p>✨ သာယာသောနေ့လေးဖြစ်ပါစေ ✨</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript Logic -->
+    <!-- Script Section -->
     <script>
-        // Hide Splash Screen
+        // Splash Screen
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
                 splash.style.opacity = '0';
                 splash.style.visibility = 'hidden';
-            }, 1500);
+            }, 1200);
         });
 
-        // POS Logic
+        // Tab Switching
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+
+            if(tabId === 'historyTab') loadHistory();
+        }
+
+        // Global State
         let items = [];
+        let currentVoucherNo = '';
 
         function initPOS() {
             const date = new Date();
-            const vNum = 'MPC-' + Math.floor(1000 + Math.random() * 9000);
-            document.getElementById('voucherNo').value = vNum;
-            document.getElementById('vNo').innerText = vNum;
+            currentVoucherNo = 'MPC-' + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('vNoBadge').innerText = currentVoucherNo;
+            document.getElementById('vNo').innerText = currentVoucherNo;
             document.getElementById('vDate').innerText = date.toLocaleDateString('en-GB');
         }
 
@@ -395,12 +528,11 @@
             const price = parseFloat(document.getElementById('itemPrice').value);
 
             if(!desc || qty <= 0 || price < 0) {
-                alert('ကျေးဇူးပြု၍ အချက်အလက်များကို မှန်ကန်စွာ ဖြည့်စွက်ပါ');
+                alert('အချက်အလက်များကို မှန်ကန်စွာ ဖြည့်ပါ');
                 return;
             }
 
-            const total = qty * price;
-            items.push({ desc, qty, price, total });
+            items.push({ desc, qty, price, total: qty * price });
 
             document.getElementById('itemDesc').value = '';
             document.getElementById('itemQty').value = '1';
@@ -449,11 +581,108 @@
         function updateTotal(subtotalCalc) {
             let subtotal = subtotalCalc !== undefined ? subtotalCalc : items.reduce((sum, item) => sum + item.total, 0);
             const discount = parseFloat(document.getElementById('discount').value) || 0;
-            const grandTotal = subtotal - discount;
+            const grandTotal = Math.max(0, subtotal - discount);
 
             document.getElementById('vSubtotal').innerText = subtotal.toLocaleString();
             document.getElementById('vDiscount').innerText = discount.toLocaleString();
-            document.getElementById('vGrandTotal').innerText = grandTotal > 0 ? grandTotal.toLocaleString() : 0;
+            document.getElementById('vGrandTotal').innerText = grandTotal.toLocaleString();
+            document.getElementById('finalTotalDisplay').value = grandTotal.toLocaleString() + ' Ks';
+        }
+
+        // Save Voucher to LocalStorage and Print
+        function saveAndPrint() {
+            if(items.length === 0) {
+                alert('Voucher ထုတ်ရန် စာရင်း အနည်းဆုံး တစ်ခု ထည့်ပါ');
+                return;
+            }
+
+            const voucherData = {
+                no: currentVoucherNo,
+                date: document.getElementById('vDate').innerText,
+                name: document.getElementById('custName').value || 'General',
+                phone: document.getElementById('custPhone').value || '-',
+                items: items,
+                subtotal: document.getElementById('vSubtotal').innerText,
+                discount: document.getElementById('discount').value,
+                total: document.getElementById('vGrandTotal').innerText
+            };
+
+            // LocalStorage မှာ သိမ်းမည်
+            let history = JSON.parse(localStorage.getItem('mpc_vouchers') || '[]');
+            history.unshift(voucherData);
+            localStorage.setItem('mpc_vouchers', JSON.stringify(history));
+
+            // Print ထုတ်မည်
+            window.print();
+
+            // Form အသစ် ပြန်စမည်
+            setTimeout(() => {
+                items = [];
+                document.getElementById('custName').value = '';
+                document.getElementById('custPhone').value = '';
+                document.getElementById('discount').value = '0';
+                renderTable();
+                initPOS();
+            }, 1000);
+        }
+
+        // Load History
+        function loadHistory() {
+            const historyList = document.getElementById('historyList');
+            let history = JSON.parse(localStorage.getItem('mpc_vouchers') || '[]');
+
+            if(history.length === 0) {
+                historyList.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">သိမ်းဆည်းထားသော Voucher မရှိသေးပါ။</p>';
+                return;
+            }
+
+            historyList.innerHTML = '';
+            history.forEach((v, idx) => {
+                historyList.innerHTML += `
+                    <div class="history-item">
+                        <div>
+                            <strong>${v.no}</strong> (${v.date})<br>
+                            <span style="font-size:11px; color:#666;">Customer: ${v.name} | Total: ${v.total} Ks</span>
+                        </div>
+                        <button onclick="reprintVoucher(${idx})" class="btn" style="width:auto; padding:6px 12px; font-size:11px;">🖨️ ပြန်ထုတ်မည်</button>
+                    </div>
+                `;
+            });
+        }
+
+        function reprintVoucher(index) {
+            let history = JSON.parse(localStorage.getItem('mpc_vouchers') || '[]');
+            let v = history[index];
+
+            document.getElementById('vNo').innerText = v.no;
+            document.getElementById('vDate').innerText = v.date;
+            document.getElementById('vCustName').innerText = v.name;
+            document.getElementById('vCustPhone').innerText = v.phone;
+
+            const vTbody = document.getElementById('vItems');
+            vTbody.innerHTML = '';
+            v.items.forEach(item => {
+                vTbody.innerHTML += `
+                    <tr>
+                        <td>${item.desc}</td>
+                        <td style="text-align: center;">${item.qty}</td>
+                        <td style="text-align: right;">${item.total}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('vSubtotal').innerText = v.subtotal;
+            document.getElementById('vDiscount').innerText = v.discount;
+            document.getElementById('vGrandTotal').innerText = v.total;
+
+            window.print();
+        }
+
+        function clearHistory() {
+            if(confirm('Voucher မှတ်တမ်းအားလုံးကို ဖျက်ရန် သေချာပါသလား?')) {
+                localStorage.removeItem('mpc_vouchers');
+                loadHistory();
+            }
         }
 
         window.onload = initPOS;
