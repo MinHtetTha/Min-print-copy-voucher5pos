@@ -55,12 +55,17 @@
         .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 2px; }
 
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
-        .voucher-card { background: white; width: 90%; max-width: 350px; max-height: 85vh; border-radius: 15px; position: relative; display: flex; flex-direction: column; }
+        .voucher-card { background: white; width: 90%; max-width: 350px; max-height: 90vh; border-radius: 15px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
         .close-v { position: absolute; top: 5px; right: 15px; font-size: 35px; color: #888; cursor: pointer; z-index: 10; }
         #vCaptureWrapper { overflow-y: auto; padding: 25px 20px; border-radius: 15px; }
         #vCapture { font-family: 'Courier New', monospace; color: #000; background: white; }
         .v-header { text-align: center; border-bottom: 2px dashed #FF8C00; padding-bottom: 10px; margin-bottom: 10px; }
         .v-logo { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #FF8C00; margin-bottom: 5px; object-fit: cover; }
+
+        .voucher-actions { padding: 10px; background: #eee; display: flex; gap: 10px; justify-content: center; }
+        .v-act-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-direct-print { background: #27ae60; color: white; }
+        .btn-pdf-download { background: #2980b9; color: white; }
 
         .hidden { display: none; }
         .report-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 5px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -73,11 +78,18 @@
         .btn-share { background: #e8f5e9; color: #2e7d32; }
         .btn-del { background: #ffebee; color: #c62828; }
         
-        .setting-btn { background: #fff; padding: 18px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border: 1.5px solid #eee; width: 100%; text-align: left; font-weight: bold; }
-        .setting-btn i { color: var(--primary); width: 25px; }
-        .setting-content { display: none; padding: 20px; border: 1.5px solid #eee; border-radius: 0 0 15px 15px; margin-top: -15px; margin-bottom: 20px; background: #fff; border-top: none; }
-        .preview-img { width: 60px; height: 60px; border-radius: 10px; border: 1px solid #ddd; margin-top: 5px; object-fit: cover; background: #eee; }
-        .pay-method-card { background: #f9f9f9; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #eee; }
+        .setting-card { background: #fff; padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1.5px solid #eee; }
+        .setting-card h4 { margin-bottom: 15px; color: var(--primary); }
+
+        /* Print Style */
+        @media print {
+            body * { visibility: hidden; }
+            #vCapture, #vCapture * { visibility: visible; }
+            #vCapture { position: absolute; left: 0; top: 0; width: 100%; }
+            .overlay { background: white; position: absolute; }
+            .voucher-card { width: 100%; max-width: 100%; box-shadow: none; }
+            .close-v, .voucher-actions { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -137,46 +149,24 @@
 </div>
 
 <div class="container hidden" id="pdfView">
-    <h3 style="margin-bottom: 15px; color: #444;"><i class="fas fa-file-pdf"></i> သိမ်းဆည်းထားသော PDF များ</h3>
+    <h3 style="margin-bottom: 15px; color: #444;"><i class="fas fa-file-pdf"></i> သိမ်းဆည်းထားသော Voucher များ</h3>
     <div id="pdfList"></div>
 </div>
 
 <div class="container hidden" id="settingsView">
     <h3 style="margin-bottom: 20px; color: #444;"><i class="fas fa-tools"></i> ဆက်တင်များ</h3>
     
-    <div class="setting-btn" onclick="toggleSetting('shopInfoSet')">
-        <span><i class="fas fa-store"></i> ဆိုင်အချက်အလက်</span>
-        <i class="fas fa-chevron-down"></i>
-    </div>
-    <div id="shopInfoSet" class="setting-content">
-        <div class="form-group">
-            <label>ဆိုင် Logo</label>
-            <input type="file" id="shopLogoInput" accept="image/*" onchange="previewFile('shopLogoInput', 'logoPreview')">
-            <img id="logoPreview" class="preview-img">
-        </div>
+    <div class="setting-card">
+        <h4><i class="fas fa-store"></i> ဆိုင်အချက်အလက် ပြင်ရန်</h4>
         <div class="form-group"><label>ဆိုင်အမည်</label><input type="text" id="setShopName"></div>
         <div class="form-group"><label>လိပ်စာ</label><input type="text" id="setShopAddress"></div>
         <div class="form-group"><label>ဖုန်းနံပါတ်</label><input type="text" id="setShopPhone"></div>
-        <div class="form-group"><label>ကျေးဇူးတင်စကား (Voucher အောက်ခြေစာသား)</label><input type="text" id="setThanksMsg"></div>
+        <div class="form-group"><label>ကျေးဇူးတင်စကား (Voucher အောက်ခြေ)</label><input type="text" id="setThanksMsg"></div>
         <button class="btn-add" onclick="saveShopSettings()">သိမ်းဆည်းမည်</button>
     </div>
 
-    <div class="setting-btn" onclick="toggleSetting('paySet')">
-        <span><i class="fas fa-credit-card"></i> ငွေပေးချေမှု & QR</span>
-        <i class="fas fa-chevron-down"></i>
-    </div>
-    <div id="paySet" class="setting-content">
-        <div class="form-group"><label>Payment အမည်</label><input type="text" id="newPayName" placeholder="AYA Pay"></div>
-        <div class="form-group"><label>QR ပုံတင်ရန်</label><input type="file" id="newPayQRInput" accept="image/*"></div>
-        <button class="btn-add" onclick="addPayMethod()">အသစ်ထည့်မည်</button>
-        <div id="payMethodsList" style="margin-top:15px;"></div>
-    </div>
-
-    <div class="setting-btn" onclick="toggleSetting('itemSet')">
-        <span><i class="fas fa-tags"></i> ပစ္စည်းများ စီမံရန်</span>
-        <i class="fas fa-chevron-down"></i>
-    </div>
-    <div id="itemSet" class="setting-content">
+    <div class="setting-card">
+        <h4><i class="fas fa-tags"></i> ပစ္စည်းများ စီမံရန်</h4>
         <div class="form-group"><label>အမည်</label><input type="text" id="newIName"></div>
         <div class="form-group"><label>စျေးနှုန်း</label><input type="number" id="newIPrice"></div>
         <button class="btn-add" onclick="saveNewItem()">ပစ္စည်းအသစ် သိမ်းမည်</button>
@@ -190,7 +180,7 @@
         <div id="vCaptureWrapper">
             <div id="vCapture">
                 <div class="v-header">
-                    <img id="vLogoImg" class="v-logo">
+                    <img id="vLogoImg" class="v-logo" src="443.png">
                     <h2 id="vShopName"></h2>
                     <p id="vShopInfo" style="font-size:11px;"></p>
                 </div>
@@ -217,6 +207,10 @@
                 </div>
             </div>
         </div>
+        <div class="voucher-actions">
+            <button class="v-act-btn btn-direct-print" onclick="triggerPrint()"><i class="fas fa-print"></i> Print ထုတ်မည်</button>
+            <button class="v-act-btn btn-pdf-download" onclick="downloadPDF()"><i class="fas fa-download"></i> PDF ယူမည်</button>
+        </div>
     </div>
 </div>
 
@@ -229,9 +223,7 @@
 
 <script>
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('SW Registered!', reg))
-            .catch(err => console.log('SW Error:', err));
+        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error:', err));
     }
 
     let deferredPrompt;
@@ -259,22 +251,19 @@
     ];
 
     let shopSettings = JSON.parse(localStorage.getItem('min_shop_settings')) || {
-        name: "Min Copy & Print", address: "လှိုင်မြို့နယ်", phone: "09964563388", logo: "443.png", thanks: "အားပေးမှုကို အထူးကျေးဇူးတင်ရှိပါသည်။"
+        name: "Min Copy & Print", address: "လှိုင်မြို့နယ်", phone: "09964563388", thanks: "အားပေးမှုကို အထူးကျေးဇူးတင်ရှိပါသည်။"
     };
 
-    let payMethods = JSON.parse(localStorage.getItem('min_payments')) || [
-        {name: "Cash", qr: ""}, {name: "KPay", qr: ""}, {name: "WavePay", qr: ""}
+    // Code ထဲမှာပဲ QR ပုံအမည်များကို တိုက်ရိုက်သတ်မှတ်ထားခြင်း
+    const payMethods = [
+        { name: "Cash", qr: "" },
+        { name: "KPay", qr: "kpay.png" },
+        { name: "WavePay", qr: "wavepay.png" }
     ];
 
     let history = JSON.parse(localStorage.getItem('min_history')) || [];
     let vCount = parseInt(localStorage.getItem('min_vcount')) || 1;
-
-    function toggleSetting(id) {
-        const el = document.getElementById(id);
-        const isVisible = el.style.display === 'block';
-        document.querySelectorAll('.setting-content').forEach(c => c.style.display = 'none');
-        el.style.display = isVisible ? 'none' : 'block';
-    }
+    let currentVoucherNo = "";
 
     function switchTab(tab) {
         document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
@@ -288,45 +277,20 @@
         if(tab === 'pos') initPOS();
     }
 
-    function previewFile(inputId, imgId) {
-        const file = document.getElementById(inputId).files[0];
-        const reader = new FileReader();
-        reader.onloadend = () => document.getElementById(imgId).src = reader.result;
-        if (file) reader.readAsDataURL(file);
-    }
-
     function saveShopSettings() {
         shopSettings.name = document.getElementById('setShopName').value;
         shopSettings.address = document.getElementById('setShopAddress').value;
         shopSettings.phone = document.getElementById('setShopPhone').value;
-        shopSettings.logo = document.getElementById('logoPreview').src;
         shopSettings.thanks = document.getElementById('setThanksMsg').value || "အားပေးမှုကို အထူးကျေးဇူးတင်ရှိပါသည်။";
         localStorage.setItem('min_shop_settings', JSON.stringify(shopSettings));
         applyShopSettings();
         alert("သိမ်းဆည်းပြီးပါပြီ");
     }
 
-    function addPayMethod() {
-        const name = document.getElementById('newPayName').value;
-        const qrInput = document.getElementById('newPayQRInput');
-        if(!name) return alert("Payment အမည်ထည့်ပါ");
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            payMethods.push({ name, qr: reader.result });
-            localStorage.setItem('min_payments', JSON.stringify(payMethods));
-            document.getElementById('newPayName').value = '';
-            qrInput.value = '';
-            renderSettings();
-        };
-        if(qrInput.files[0]) reader.readAsDataURL(qrInput.files[0]);
-        else { payMethods.push({ name, qr: "" }); localStorage.setItem('min_payments', JSON.stringify(payMethods)); renderSettings(); }
-    }
-
     function applyShopSettings() {
         document.getElementById('headerShopName').innerText = shopSettings.name;
         document.getElementById('vShopName').innerText = shopSettings.name;
         document.getElementById('vShopInfo').innerText = `${shopSettings.address}။ ဖုန်း-${shopSettings.phone}`;
-        document.getElementById('vLogoImg').src = shopSettings.logo || "443.png";
         document.getElementById('vThanksText').innerText = shopSettings.thanks;
     }
 
@@ -366,24 +330,20 @@
         return { s, e, d, total };
     }
 
-    async function generateVoucher() {
+    function generateVoucher() {
         const res = calc(), pay = document.getElementById('pMethod').value, cName = document.getElementById('custName').value, cPhone = document.getElementById('custPhone').value;
         const vNo = vCount.toString().padStart(4, '0'), now = new Date(), dStr = now.toLocaleDateString();
+        currentVoucherNo = vNo;
         const vData = { vNo, date: dStr, total: res.total, items: [...cart], method: pay, customer: cName || 'General', phone: cPhone, extra: res.e, disc: res.d, thanks: shopSettings.thanks };
         renderVoucherToOverlay(vData);
         history.push(vData); localStorage.setItem('min_history', JSON.stringify(history));
         vCount++; localStorage.setItem('min_vcount', vCount);
         document.getElementById('vOverlay').style.display = 'flex';
-        setTimeout(async () => {
-            const canvas = await html2canvas(document.getElementById('vCapture'), { scale: 2 });
-            const doc = new jspdf.jsPDF({ orientation: 'p', unit: 'mm', format: [80, 200] });
-            doc.addImage(canvas.toDataURL('image/png'), 'PNG', 2, 2, 76, 0);
-            doc.save(`Min_${vNo}.pdf`);
-        }, 800);
     }
 
     function renderVoucherToOverlay(h) {
         applyShopSettings();
+        currentVoucherNo = h.vNo;
         document.getElementById('vnNo').innerText = "Voucher: #" + h.vNo;
         document.getElementById('vdDate').innerText = "Date: " + h.date;
         document.getElementById('vsSub').innerText = h.items.reduce((acc, i) => acc + i.t, 0).toLocaleString();
@@ -395,25 +355,32 @@
         document.getElementById('vnName').innerText = h.customer;
         document.getElementById('vnPhone').innerText = h.phone || '-';
         document.getElementById('vtBody').innerHTML = h.items.map(i => `<tr><td>${i.n}</td><td align="center">${i.q}</td><td align="right">${i.t.toLocaleString()}</td></tr>`).join('');
+        
         const payObj = payMethods.find(m => m.name === h.method);
         const qrBox = document.getElementById('vQRBox');
-        if(payObj && payObj.qr) { qrBox.style.display = 'block'; document.getElementById('vQRImg').src = payObj.qr; document.getElementById('vQRLabel').innerText = `Scan to Pay with ${h.method}`; }
-        else qrBox.style.display = 'none';
+        if(payObj && payObj.qr) { 
+            qrBox.style.display = 'block'; 
+            document.getElementById('vQRImg').src = payObj.qr; 
+            document.getElementById('vQRLabel').innerText = `Scan to Pay with ${h.method}`; 
+        } else {
+            qrBox.style.display = 'none';
+        }
+    }
+
+    function triggerPrint() {
+        window.print();
+    }
+
+    async function downloadPDF() {
+        const canvas = await html2canvas(document.getElementById('vCapture'), { scale: 2 });
+        const doc = new jspdf.jsPDF({ orientation: 'p', unit: 'mm', format: [80, 200] });
+        doc.addImage(canvas.toDataURL('image/png'), 'PNG', 2, 2, 76, 0);
+        doc.save(`Min_${currentVoucherNo}.pdf`);
     }
 
     async function shareAsPDF(idx) {
         const h = history[idx]; renderVoucherToOverlay(h);
         document.getElementById('vOverlay').style.display = 'flex';
-        setTimeout(async () => {
-            const canvas = await html2canvas(document.getElementById('vCapture'), { scale: 2 });
-            const doc = new jspdf.jsPDF({ orientation: 'p', unit: 'mm', format: [80, 200] });
-            doc.addImage(canvas.toDataURL('image/png'), 'PNG', 2, 2, 76, 0);
-            const pdfBlob = doc.output('blob');
-            const pdfFile = new File([pdfBlob], `Min_Voucher_${h.vNo}.pdf`, { type: 'application/pdf' });
-            if (navigator.share) {
-                try { await navigator.share({ files: [pdfFile], title: `Voucher #${h.vNo}` }); } catch (err) { alert("Sharing failed"); }
-            } else { alert("Your device doesn't support direct sharing. File saved instead."); doc.save(`Voucher_${h.vNo}.pdf`); }
-        }, 500);
     }
 
     function renderHistory() {
@@ -431,7 +398,6 @@
             const rIdx = history.length - 1 - i;
             return `<div class="pdf-item"><div class="pdf-info"><b>#${h.vNo} - ${h.customer}</b><br><small>${h.date}</small></div><div class="pdf-actions">
                 <button class="pdf-btn btn-view" onclick="reViewVoucher(${rIdx})"><i class="fas fa-eye"></i></button>
-                <button class="pdf-btn btn-share" onclick="shareAsPDF(${rIdx})"><i class="fas fa-share-nodes"></i></button>
                 <button class="pdf-btn btn-del" onclick="deleteHistory(${rIdx})"><i class="fas fa-trash"></i></button>
             </div></div>`;
         }).join('');
@@ -441,13 +407,10 @@
         document.getElementById('setShopName').value = shopSettings.name;
         document.getElementById('setShopAddress').value = shopSettings.address;
         document.getElementById('setShopPhone').value = shopSettings.phone;
-        document.getElementById('logoPreview').src = shopSettings.logo || "443.png";
         document.getElementById('setThanksMsg').value = shopSettings.thanks;
-        document.getElementById('payMethodsList').innerHTML = payMethods.map((m, i) => `<div class="pay-method-card"><div style="display:flex; align-items:center; gap:10px;"><img src="${m.qr || ''}" class="preview-img" style="width:30px; height:30px; ${m.qr?'':'display:none;'}"><b>${m.name}</b></div>${m.name !== 'Cash' ? `<i class="fas fa-times" style="color:red; cursor:pointer;" onclick="deletePayMethod(${i})"></i>` : ''}</div>`).join('');
         document.getElementById('manageItemsList').innerHTML = items.map((item, i) => `<div class="bill-item"><span>${item.name} (${item.price})</span><i class="fas fa-trash trash-btn" onclick="deleteItem(${i})"></i></div>`).join('');
     }
 
-    function deletePayMethod(i) { payMethods.splice(i,1); localStorage.setItem('min_payments', JSON.stringify(payMethods)); renderSettings(); }
     function deleteItem(i) { items.splice(i,1); localStorage.setItem('min_items', JSON.stringify(items)); renderSettings(); initPOS(); }
     function saveNewItem() { const n = document.getElementById('newIName').value, p = parseInt(document.getElementById('newIPrice').value); if(n && p) { items.push({name:n, price:p}); localStorage.setItem('min_items', JSON.stringify(items)); renderSettings(); initPOS(); } }
     function reViewVoucher(idx) { renderVoucherToOverlay(history[idx]); document.getElementById('vOverlay').style.display = 'flex'; }
