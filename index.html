@@ -176,6 +176,20 @@
         .setting-card { background: white; padding: 24px; border-radius: 16px; border: 1px solid var(--border); }
         .setting-card h4 { margin-bottom: 16px; color: var(--dark); font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
 
+        /* Inline Item Price Edit Rows in Settings */
+        .edit-item-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+        .edit-item-row:last-child { border-bottom: none; }
+        .edit-name-input { flex: 1.5; padding: 7px 10px; font-size: 0.88rem; }
+        .edit-price-input { width: 95px; padding: 7px 10px; font-size: 0.88rem; text-align: right; }
+        .btn-save-row { background: var(--success); color: white; padding: 7px 10px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+        .btn-save-row:hover { background: #059669; }
+
         .hidden { display: none !important; }
 
         /* Voucher Modal Overlay */
@@ -825,21 +839,45 @@
             return;
         }
         box.innerHTML = items.map((item, idx) => `
-            <div class="bill-item">
-                <div class="item-info">
-                    <b>${item.name}</b>
-                    <small>${Number(item.price).toLocaleString()} KS</small>
-                </div>
+            <div class="edit-item-row">
+                <input type="text" id="editName_${idx}" class="edit-name-input" value="${item.name.replace(/"/g, '&quot;')}" placeholder="ပစ္စည်းအမည်">
+                <input type="number" id="editPrice_${idx}" class="edit-price-input" value="${item.price}" min="1" placeholder="ဈေးနှုန်း">
+                <button class="btn-save-row" onclick="updateItemRow(${idx})" title="သိမ်းမည်"><i class="fas fa-check"></i></button>
                 <i class="fas fa-trash-alt trash-btn" onclick="deleteItem(${idx})"></i>
             </div>
         `).join('');
     }
 
+    function updateItemRow(idx) {
+        const nameInput = document.getElementById(`editName_${idx}`);
+        const priceInput = document.getElementById(`editPrice_${idx}`);
+        if (!nameInput || !priceInput) return;
+
+        const newName = nameInput.value.trim();
+        const newPrice = parseInt(priceInput.value, 10);
+
+        if (!newName) {
+            alert("ပစ္စည်းအမည် ထည့်ပေးပါ။");
+            nameInput.focus();
+            return;
+        }
+        if (isNaN(newPrice) || newPrice <= 0) {
+            alert("ဈေးနှုန်းကို 0 ထက်ကြီးတဲ့ ဂဏန်းမှန် ထည့်ပေးပါ။");
+            priceInput.focus();
+            return;
+        }
+
+        items[idx] = { name: newName, price: newPrice };
+        localStorage.setItem('min_items', JSON.stringify(items));
+        initPOS();
+        alert(`"${newName}" ဈေးနှုန်း (${newPrice.toLocaleString()} KS) သိမ်းဆည်းပြီးပါပြီ။`);
+    }
+
     function saveNewItem() {
         const name = document.getElementById('newIName').value.trim();
-        const price = parseInt(document.getElementById('newIPrice').value) || 0;
+        const price = parseInt(document.getElementById('newIPrice').value, 10) || 0;
         if (!name || price <= 0) {
-            alert("ပစ္စည်းအမည်နှင့် စျေးနှုန်း မှန်ကန်စွာ ထည့်ပါ။");
+            alert("ပစ္စည်းအမည်နှင့် ဈေးနှုန်း မှန်ကန်စွာ ထည့်ပါ။");
             return;
         }
         items.push({ name, price });
@@ -851,6 +889,7 @@
     }
 
     function deleteItem(idx) {
+        if (!confirm(`"${items[idx]?.name}" ကို ဖျက်မှာ သေချာပါသလား?`)) return;
         items.splice(idx, 1);
         localStorage.setItem('min_items', JSON.stringify(items));
         renderManageItems();
