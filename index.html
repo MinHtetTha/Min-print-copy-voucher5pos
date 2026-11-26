@@ -456,7 +456,8 @@
         {name: "A4 တစ်ဖက်", price: 100},
         {name: "A4 နှစ်ဖက်", price: 200},
         {name: "A4 Color", price: 500},
-        {name: "Laminate A4", price: 500}
+        {name: "Legal တစ်ဖက်", price: 300}
+        {name: "Legal နှစ်ဖက်", price: 500}
     ];
 
     let shopSettings = JSON.parse(localStorage.getItem('min_shop_settings')) || {
@@ -469,7 +470,9 @@
     const payMethods = [
         { name: "Cash", qr: "" },
         { name: "KPay", qr: "kpay.jpg" },
-        { name: "WavePay", qr: "wavepay.jpg" }
+        { name: "WavePay", qr: "wavepay.jpg" },
+        { name: "AYA Pay", qr: "ayapay.jpg" },
+        { name: "MM QR", qr: "cbpay.jpg" }
     ];
 
     let history = JSON.parse(localStorage.getItem('min_history')) || [];
