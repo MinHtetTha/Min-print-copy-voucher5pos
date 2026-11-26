@@ -126,6 +126,29 @@
         }
         .btn-add:hover { background: var(--primary-dark); }
 
+        /* Customer Point UI */
+        .point-helper {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-use-point {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-use-point:hover { background: var(--primary-dark); }
+
         /* Right Panel: Cart & Checkout */
         .cart-list { flex: 1; overflow-y: auto; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: 10px 0; padding: 8px 0; min-height: 150px; }
         .empty-cart { text-align: center; color: var(--muted); padding: 40px 0; font-size: 0.9rem; }
@@ -158,11 +181,78 @@
 
         /* Other Views (History, Vouchers, Settings) */
         .sub-container { max-width: 900px; margin: 0 auto; }
-        .stats-banner {
-            background: linear-gradient(135deg, var(--primary), #f97316);
-            color: white; padding: 24px; border-radius: 16px; margin-bottom: 20px;
-            display: flex; justify-content: space-between; align-items: center;
+        .sales-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
         }
+        .sales-stat-card {
+            background: white;
+            padding: 18px 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .sales-stat-card.weekly { border-top-color: #2563eb; }
+        .sales-stat-card.monthly { border-top-color: var(--success); }
+        .sales-stat-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .sales-stat-val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        .customer-board {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        .customer-board h4 {
+            color: var(--dark);
+            font-size: 1rem;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .customer-table-wrap { overflow-x: auto; }
+        .customer-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+        .customer-table th, .customer-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .customer-table th {
+            background: var(--bg);
+            color: var(--dark);
+            font-weight: 700;
+        }
+        .point-badge {
+            background: var(--primary-light);
+            color: #c2410c;
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.78rem;
+            border: 1px solid #fed7aa;
+        }
+
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; }
         .report-card { background: white; padding: 16px; border-radius: 14px; border: 1px solid var(--border); border-left: 4px solid var(--primary); }
         
@@ -190,6 +280,21 @@
         .btn-save-row { background: var(--success); color: white; padding: 7px 10px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
         .btn-save-row:hover { background: #059669; }
 
+        /* Backup / Restore Buttons */
+        .backup-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-backup {
+            flex: 1; background: #0f172a; color: white; border: none; padding: 11px 14px;
+            border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center; gap: 7px; transition: background 0.2s;
+        }
+        .btn-backup:hover { background: #1e293b; }
+        .btn-restore {
+            flex: 1; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 11px 14px;
+            border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center; gap: 7px; transition: background 0.2s;
+        }
+        .btn-restore:hover { background: #bae6fd; }
+
         .hidden { display: none !important; }
 
         /* Voucher Modal Overlay */
@@ -214,6 +319,7 @@
         @media (max-width: 850px) {
             body { height: auto; overflow: auto; padding-bottom: 70px; }
             .pos-grid { grid-template-columns: 1fr; height: auto; }
+            .sales-summary-grid { grid-template-columns: 1fr; }
             .settings-grid { grid-template-columns: 1fr; }
             .top-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); justify-content: space-around; padding: 8px; z-index: 1000; }
             .nav-tab { flex-direction: column; gap: 4px; font-size: 0.75rem; padding: 6px; }
@@ -296,14 +402,24 @@
 
             <div class="panel-title"><i class="fas fa-user-tag"></i> ဝယ်ယူသူ အချက်အလက် (Optional)</div>
             <div class="form-row">
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 0;">
                     <label>ဝယ်ယူသူအမည်</label>
-                    <input type="text" id="custName" placeholder="ဥပမာ - ဦးမင်း">
+                    <input type="text" id="custName" placeholder="ဥပမာ - ဦးမင်း" oninput="refreshCustomerPointUI()">
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 0;">
                     <label>ဖုန်းနံပါတ်</label>
-                    <input type="tel" id="custPhone" placeholder="09xxxxxxxxx">
+                    <input type="tel" id="custPhone" placeholder="09xxxxxxxxx" oninput="refreshCustomerPointUI()">
                 </div>
+            </div>
+
+            <div id="custPointBar" class="point-helper" style="display:none;">
+                <span>လက်ရှိ Point: <b id="custAvailPoints">0</b> pts (<span id="custMaxDisc">0</span> KS လျှော့နိုင်)</span>
+                <button type="button" class="btn-use-point" onclick="applyMaxCustomerPoints()">Point အကုန်သုံးမည်</button>
+            </div>
+
+            <div class="form-group" style="margin-top: 8px; margin-bottom: 0;">
+                <label id="redeemPointsLabel">Point သုံးပြီး လျှော့မည့် Point အရေအတွက် (1 pt = 100 KS)</label>
+                <input type="number" id="redeemPoints" value="0" min="0" oninput="onRedeemPointsChange()">
             </div>
         </div>
 
@@ -348,13 +464,50 @@
 
     <!-- 2. HISTORY VIEW -->
     <div id="historyView" class="sub-container hidden">
-        <div class="stats-banner">
-            <div>
-                <p style="opacity: 0.9; font-size: 0.95rem;">ဒီနေ့ ရောင်းရငွေ စုစုပေါင်း</p>
-                <h2 id="statTotal" style="font-size: 2rem; margin-top: 4px;">0 KS</h2>
+        <div class="sales-summary-grid">
+            <div class="sales-stat-card">
+                <div class="sales-stat-label">
+                    <span>နေ့စဉ် (ဒီနေ့ ရောင်းရငွေ)</span>
+                    <i class="fas fa-calendar-day" style="color:var(--primary);"></i>
+                </div>
+                <div id="statDaily" class="sales-stat-val">0 KS</div>
             </div>
-            <i class="fas fa-coins fa-3x" style="opacity: 0.3;"></i>
+
+            <div class="sales-stat-card weekly">
+                <div class="sales-stat-label">
+                    <span>အပတ်စဉ် (ဒီအပတ် ရောင်းရငွေ)</span>
+                    <i class="fas fa-calendar-week" style="color:#2563eb;"></i>
+                </div>
+                <div id="statWeekly" class="sales-stat-val">0 KS</div>
+            </div>
+
+            <div class="sales-stat-card monthly">
+                <div class="sales-stat-label">
+                    <span>လစဉ် (ဒီလ ရောင်းရငွေ)</span>
+                    <i class="fas fa-calendar-alt" style="color:var(--success);"></i>
+                </div>
+                <div id="statMonthly" class="sales-stat-val">0 KS</div>
+            </div>
         </div>
+
+        <div class="customer-board">
+            <h4><i class="fas fa-crown" style="color:#f59e0b;"></i> အဝယ်အများဆုံး Customer များနှင့် Point မှတ်တမ်း</h4>
+            <div class="customer-table-wrap">
+                <table class="customer-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>ဝယ်ယူသူ / ဖုန်း</th>
+                            <th>အကြိမ်ရေ</th>
+                            <th>စုစုပေါင်း ဝယ်ယူငွေ</th>
+                            <th>လက်ရှိ Point</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topCustomersBody"></tbody>
+                </table>
+            </div>
+        </div>
+
         <div id="historyList" class="grid-cards"></div>
     </div>
 
@@ -373,7 +526,16 @@
                 <div class="form-group"><label>လိပ်စာ</label><input type="text" id="setShopAddress"></div>
                 <div class="form-group"><label>ဖုန်းနံပါတ်</label><input type="text" id="setShopPhone"></div>
                 <div class="form-group"><label>ကျေးဇူးတင်စကား (Voucher အောက်ခြေ)</label><input type="text" id="setThanksMsg"></div>
-                <button class="btn-add" onclick="saveShopSettings()"><i class="fas fa-save"></i> ပြောင်းလဲမှုများ သိမ်းမည်</button>
+                <button type="button" class="btn-add" onclick="saveShopSettings()"><i class="fas fa-save"></i> ပြောင်းလဲမှုများ သိမ်းမည်</button>
+
+                <hr style="border: none; border-top: 1px solid var(--border); margin: 18px 0 14px;">
+                <h4 style="margin-bottom: 8px; font-size: 1rem;"><i class="fas fa-database" style="color:var(--primary);"></i> Data Backup / Restore</h4>
+                <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 10px;">မှတ်တမ်းများ မပျောက်စေရန် ဖိုင်သိမ်းထားနိုင်ပြီး လိုအပ်လျှင် ပြန်သွင်းနိုင်ပါသည်။</p>
+                <div class="backup-actions">
+                    <button type="button" class="btn-backup" onclick="exportBackup()"><i class="fas fa-file-export"></i> Backup သိမ်းမည်</button>
+                    <button type="button" class="btn-restore" onclick="document.getElementById('restoreFileInput').click()"><i class="fas fa-file-import"></i> Restore ပြန်သွင်းမည်</button>
+                </div>
+                <input type="file" id="restoreFileInput" accept=".json,application/json" style="display:none;" onchange="importBackup(event)">
             </div>
 
             <div class="setting-card">
@@ -382,8 +544,24 @@
                     <div class="form-group" style="flex:2;"><label>ပစ္စည်းအမည်</label><input type="text" id="newIName" placeholder="ဥပမာ - Laminate A4"></div>
                     <div class="form-group" style="flex:1;"><label>စျေးနှုန်း</label><input type="number" id="newIPrice" placeholder="500"></div>
                 </div>
-                <button class="btn-add" onclick="saveNewItem()"><i class="fas fa-plus"></i> ပစ္စည်းအသစ် ထည့်မည်</button>
-                <div id="manageItemsList" style="margin-top:16px; max-height: 280px; overflow-y: auto;"></div>
+                <button type="button" class="btn-add" onclick="saveNewItem()"><i class="fas fa-plus"></i> ပစ္စည်းအသစ် ထည့်မည်</button>
+                <div id="manageItemsList" style="margin-top:16px; max-height: 340px; overflow-y: auto;"></div>
+            </div>
+
+            <div class="setting-card" style="grid-column: 1 / -1;">
+                <h4><i class="fas fa-award" style="color:var(--primary);"></i> Point ရရှိနှုန်းနှင့် လျှော့ဈေးနှုန်းထား သတ်မှတ်ရန်</h4>
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>ဘယ်နှစ်ကျပ်ဖိုး ဝယ်လျှင် 1 Point ရမလဲ (KS)</label>
+                        <input type="number" id="setPointEarnStep" min="1" placeholder="1000">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>1 Point လျှင် ဘယ်နှစ်ကျပ် လျှော့ပေးမလဲ (KS)</label>
+                        <input type="number" id="setPointValueKs" min="1" placeholder="100">
+                    </div>
+                </div>
+                <p id="pointRatePreview" style="font-size: 0.82rem; color: var(--muted); margin: 10px 0 12px;"></p>
+                <button type="button" class="btn-add" onclick="savePointSettings()"><i class="fas fa-save"></i> Point နှုန်းထား သိမ်းမည်</button>
             </div>
         </div>
     </div>
@@ -465,6 +643,11 @@
         }
     }
 
+    const DEFAULT_POINT_SETTINGS = {
+        earnStepKs: 1000,
+        valueKs: 100
+    };
+
     let cart = [];
     let items = JSON.parse(localStorage.getItem('min_items')) || [
         {name: "A4 တစ်ဖက်", price: 100},
@@ -481,6 +664,8 @@
         thanks: "အားပေးမှုကို အထူးကျေးဇူးတင်ရှိပါသည်။"
     };
 
+    let pointSettings = JSON.parse(localStorage.getItem('min_point_settings')) || { ...DEFAULT_POINT_SETTINGS };
+
     const payMethods = [
         { name: "Cash", qr: "" },
         { name: "KPay", qr: "kpay.jpg" },
@@ -490,9 +675,63 @@
     ];
 
     let history = JSON.parse(localStorage.getItem('min_history')) || [];
+    let customersData = JSON.parse(localStorage.getItem('min_customers')) || {};
     let vCount = parseInt(localStorage.getItem('min_vcount')) || 1;
     let currentVoucherNo = "";
     let isNewSale = false;
+
+    function getEarnStepKs() {
+        const val = parseInt(pointSettings.earnStepKs, 10);
+        return (!isNaN(val) && val > 0) ? val : DEFAULT_POINT_SETTINGS.earnStepKs;
+    }
+
+    function getPointValueKs() {
+        const val = parseInt(pointSettings.valueKs, 10);
+        return (!isNaN(val) && val > 0) ? val : DEFAULT_POINT_SETTINGS.valueKs;
+    }
+
+    function applyPointRateLabels() {
+        const step = getEarnStepKs();
+        const valKs = getPointValueKs();
+
+        const redeemLabel = document.getElementById('redeemPointsLabel');
+        if (redeemLabel) {
+            redeemLabel.innerText = `Point သုံးပြီး လျှော့မည့် Point အရေအတွက် (1 pt = ${valKs.toLocaleString()} KS)`;
+        }
+
+        const preview = document.getElementById('pointRatePreview');
+        if (preview) {
+            preview.innerText = `လက်ရှိသတ်မှတ်ချက် - ဝယ်ယူငွေ ${step.toLocaleString()} KS တိုင်း 1 Point ရရှိပြီး၊ 1 Point လျှင် ${valKs.toLocaleString()} KS လျှော့ပေးပါမည်။`;
+        }
+    }
+
+    function savePointSettings() {
+        const stepInput = document.getElementById('setPointEarnStep');
+        const valInput = document.getElementById('setPointValueKs');
+        if (!stepInput || !valInput) return;
+
+        const newStep = parseInt(stepInput.value, 10);
+        const newVal = parseInt(valInput.value, 10);
+
+        if (isNaN(newStep) || newStep <= 0) {
+            alert("Point ရရှိမည့် ငွေပမာဏကို 0 ထက်ကြီးတဲ့ ဂဏန်းမှန် ထည့်ပေးပါ။");
+            stepInput.focus();
+            return;
+        }
+        if (isNaN(newVal) || newVal <= 0) {
+            alert("1 Point လျှော့ပေးမည့် ငွေပမာဏကို 0 ထက်ကြီးတဲ့ ဂဏန်းမှန် ထည့်ပေးပါ။");
+            valInput.focus();
+            return;
+        }
+
+        pointSettings = { earnStepKs: newStep, valueKs: newVal };
+        localStorage.setItem('min_point_settings', JSON.stringify(pointSettings));
+
+        applyPointRateLabels();
+        refreshCustomerPointUI();
+        onRedeemPointsChange();
+        alert(`Point နှုန်းထား (${newStep.toLocaleString()} KS = 1 pt, 1 pt = ${newVal.toLocaleString()} KS) သိမ်းဆည်းပြီးပါပြီ။`);
+    }
 
     function switchTab(tab) {
         document.getElementById('posView').classList.add('hidden');
@@ -529,8 +768,157 @@
         document.getElementById('vThanksText').innerText = shopSettings.thanks;
     }
 
+    function exportBackup() {
+        const backupPayload = {
+            app: "Min Copy & Print POS",
+            exportedAt: new Date().toISOString(),
+            items: items,
+            shopSettings: shopSettings,
+            pointSettings: pointSettings,
+            history: history,
+            customersData: customersData,
+            vCount: vCount
+        };
+        const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const dateStamp = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `min-pos-backup-${dateStamp}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function importBackup(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const parsed = JSON.parse(e.target.result);
+                if (!parsed || !Array.isArray(parsed.history) || !Array.isArray(parsed.items)) {
+                    alert("မှန်ကန်သော Backup ဖိုင် မဟုတ်ပါ။");
+                    return;
+                }
+                if (!confirm("လက်ရှိ Data များကို Backup ဖိုင်ထဲက Data များဖြင့် အစားထိုးမှာ သေချာပါသလား?")) {
+                    return;
+                }
+
+                items = parsed.items;
+                history = parsed.history;
+                if (parsed.shopSettings && typeof parsed.shopSettings === "object") {
+                    shopSettings = { ...shopSettings, ...parsed.shopSettings };
+                }
+                if (parsed.pointSettings && typeof parsed.pointSettings === "object") {
+                    pointSettings = { ...DEFAULT_POINT_SETTINGS, ...parsed.pointSettings };
+                }
+                if (parsed.customersData && typeof parsed.customersData === "object") {
+                    customersData = parsed.customersData;
+                }
+                const nextCount = parseInt(parsed.vCount, 10);
+                vCount = (!isNaN(nextCount) && nextCount > 0) ? nextCount : (history.length + 1);
+
+                localStorage.setItem("min_items", JSON.stringify(items));
+                localStorage.setItem("min_history", JSON.stringify(history));
+                localStorage.setItem("min_shop_settings", JSON.stringify(shopSettings));
+                localStorage.setItem("min_point_settings", JSON.stringify(pointSettings));
+                localStorage.setItem("min_customers", JSON.stringify(customersData));
+                localStorage.setItem("min_vcount", vCount.toString());
+
+                applyShopSettings();
+                applyPointRateLabels();
+                renderSettings();
+                initPOS();
+                alert("Backup Data များကို အောင်မြင်စွာ ပြန်သွင်းပြီးပါပြီ။");
+            } catch (err) {
+                console.error(err);
+                alert("Backup ဖိုင်ကို ဖတ်၍မရပါ။ ဖိုင်ပျက်စီးနေနိုင်ပါသည်။");
+            } finally {
+                event.target.value = "";
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function getCustomerKey(name, phone) {
+        const cleanName = (name || '').trim();
+        const cleanPhone = (phone || '').trim();
+        if (!cleanName && !cleanPhone) return '';
+        return `${cleanName.toLowerCase()}|${cleanPhone}`;
+    }
+
+    function getCustomerPoints(name, phone) {
+        const key = getCustomerKey(name, phone);
+        if (!key || !customersData[key]) return 0;
+        return Math.max(0, parseInt(customersData[key].points, 10) || 0);
+    }
+
+    function refreshCustomerPointUI() {
+        const cName = document.getElementById('custName')?.value || '';
+        const cPhone = document.getElementById('custPhone')?.value || '';
+        const key = getCustomerKey(cName, cPhone);
+        const bar = document.getElementById('custPointBar');
+        const redeemInput = document.getElementById('redeemPoints');
+        if (!bar || !redeemInput) return;
+
+        if (!key || !customersData[key]) {
+            bar.style.display = 'none';
+            if (parseInt(redeemInput.value, 10) > 0) {
+                redeemInput.value = '0';
+                onRedeemPointsChange();
+            }
+            return;
+        }
+
+        const availPts = Math.max(0, parseInt(customersData[key].points, 10) || 0);
+        const pointVal = getPointValueKs();
+        bar.style.display = 'flex';
+        document.getElementById('custAvailPoints').innerText = availPts.toLocaleString();
+        document.getElementById('custMaxDisc').innerText = (availPts * pointVal).toLocaleString();
+    }
+
+    function applyMaxCustomerPoints() {
+        const cName = document.getElementById('custName')?.value || '';
+        const cPhone = document.getElementById('custPhone')?.value || '';
+        const availPts = getCustomerPoints(cName, cPhone);
+        const pointVal = getPointValueKs();
+        const sub = cart.reduce((x, i) => x + i.t, 0);
+        const extra = parseInt(document.getElementById('extra')?.value, 10) || 0;
+        const maxApplicableByBill = Math.floor(Math.max(0, sub + extra) / pointVal);
+        const usePts = Math.min(availPts, maxApplicableByBill);
+
+        const redeemInput = document.getElementById('redeemPoints');
+        if (redeemInput) {
+            redeemInput.value = usePts;
+            onRedeemPointsChange();
+        }
+    }
+
+    function onRedeemPointsChange() {
+        const cName = document.getElementById('custName')?.value || '';
+        const cPhone = document.getElementById('custPhone')?.value || '';
+        const availPts = getCustomerPoints(cName, cPhone);
+        const redeemInput = document.getElementById('redeemPoints');
+        const discInput = document.getElementById('disc');
+        if (!redeemInput || !discInput) return;
+
+        let pts = parseInt(redeemInput.value, 10);
+        if (isNaN(pts) || pts < 0) pts = 0;
+        if (availPts > 0 && pts > availPts) {
+            pts = availPts;
+            redeemInput.value = pts;
+        }
+
+        discInput.value = pts * getPointValueKs();
+        calc();
+    }
+
     function initPOS() {
         applyShopSettings();
+        applyPointRateLabels();
         const dl = document.getElementById('items');
         const qb = document.getElementById('quickButtons');
         const ps = document.getElementById('pMethod');
@@ -545,6 +933,7 @@
         });
         payMethods.forEach(m => ps.innerHTML += `<option value="${m.name}">${m.name}</option>`);
         if (prevPay) ps.value = prevPay;
+        refreshCustomerPointUI();
         calc();
     }
 
@@ -693,6 +1082,10 @@
         currentVoucherNo = vNo;
         isNewSale = true;
 
+        const usedPoints = Math.max(0, parseInt(document.getElementById('redeemPoints')?.value, 10) || 0);
+        const earnedPoints = Math.floor((res.total || 0) / getEarnStepKs());
+        const custKey = getCustomerKey(cName, cPhone);
+
         const vData = {
             vNo,
             date: dStr,
@@ -704,8 +1097,29 @@
             extra: res.e,
             disc: res.d,
             total: res.total,
-            pay
+            pay,
+            usedPoints,
+            earnedPoints
         };
+
+        if (custKey) {
+            const prev = customersData[custKey] || {
+                name: cName || 'Customer',
+                phone: cPhone || '',
+                orders: 0,
+                totalSpent: 0,
+                points: 0
+            };
+            const safeUsed = Math.min(prev.points || 0, usedPoints);
+            vData.usedPoints = safeUsed;
+            prev.name = cName || prev.name;
+            prev.phone = cPhone || prev.phone;
+            prev.orders = (prev.orders || 0) + 1;
+            prev.totalSpent = (prev.totalSpent || 0) + (res.total || 0);
+            prev.points = Math.max(0, (prev.points || 0) - safeUsed + earnedPoints);
+            customersData[custKey] = prev;
+            localStorage.setItem('min_customers', JSON.stringify(customersData));
+        }
 
         history.unshift(vData);
         vCount += 1;
@@ -719,6 +1133,10 @@
         document.getElementById('disc').value = '0';
         document.getElementById('custName').value = '';
         document.getElementById('custPhone').value = '';
+        if (document.getElementById('redeemPoints')) {
+            document.getElementById('redeemPoints').value = '0';
+        }
+        refreshCustomerPointUI();
         renderCart();
     }
 
@@ -760,12 +1178,81 @@
         }
     }
 
+    function parseLocalDate(isoDateStr) {
+        if (!isoDateStr || typeof isoDateStr !== "string") return null;
+        const parts = isoDateStr.split("-");
+        if (parts.length !== 3) return null;
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const d = parseInt(parts[2], 10);
+        if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
+        return new Date(y, m, d);
+    }
+
+    function renderTopCustomers() {
+        const tbody = document.getElementById('topCustomersBody');
+        if (!tbody) return;
+
+        const list = Object.values(customersData || {}).sort((a, b) => (b.totalSpent || 0) - (a.totalSpent || 0));
+        if (!list.length) {
+            tbody.innerHTML = `<tr><td colspan="5" style="color:var(--muted); text-align:center;">Customer မှတ်တမ်း မရှိသေးပါ။ ဝယ်ယူသူအမည် သို့မဟုတ် ဖုန်းထည့်ပြီး ဘောင်ချာထုတ်ပါ။</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = list.slice(0, 10).map((c, i) => `
+            <tr>
+                <td><b>#${i + 1}</b></td>
+                <td>
+                    <b>${c.name || '-'}</b>
+                    ${c.phone ? `<div style="font-size:0.78rem; color:var(--muted);">${c.phone}</div>` : ''}
+                </td>
+                <td>${c.orders || 0} ကြိမ်</td>
+                <td><b style="color:var(--primary);">${Number(c.totalSpent || 0).toLocaleString()} KS</b></td>
+                <td><span class="point-badge">${Number(c.points || 0).toLocaleString()} pts</span></td>
+            </tr>
+        `).join('');
+    }
+
     function renderHistory() {
-        const today = new Date().toISOString().slice(0, 10);
-        const todaySales = history
-            .filter(h => h.isoDate === today)
-            .reduce((sum, h) => sum + (h.total || 0), 0);
-        document.getElementById('statTotal').innerText = todaySales.toLocaleString() + ' KS';
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const dayOfWeek = todayStart.getDay();
+        const diffToMonday = (dayOfWeek + 6) % 7;
+        const weekStart = new Date(todayStart);
+        weekStart.setDate(todayStart.getDate() - diffToMonday);
+
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+        let dailyTotal = 0;
+        let weeklyTotal = 0;
+        let monthlyTotal = 0;
+
+        history.forEach(h => {
+            const amt = Number(h.total) || 0;
+            const dObj = parseLocalDate(h.isoDate);
+            if (!dObj) return;
+
+            if (dObj.getTime() === todayStart.getTime()) {
+                dailyTotal += amt;
+            }
+            if (dObj >= weekStart && dObj <= todayStart) {
+                weeklyTotal += amt;
+            }
+            if (dObj >= monthStart && dObj < nextMonthStart) {
+                monthlyTotal += amt;
+            }
+        });
+
+        const dailyEl = document.getElementById('statDaily');
+        const weeklyEl = document.getElementById('statWeekly');
+        const monthlyEl = document.getElementById('statMonthly');
+
+        if (dailyEl) dailyEl.innerText = dailyTotal.toLocaleString() + ' KS';
+        if (weeklyEl) weeklyEl.innerText = weeklyTotal.toLocaleString() + ' KS';
+        if (monthlyEl) monthlyEl.innerText = monthlyTotal.toLocaleString() + ' KS';
+
+        renderTopCustomers();
 
         const list = document.getElementById('historyList');
         if (!history.length) {
@@ -829,6 +1316,13 @@
         document.getElementById('setShopAddress').value = shopSettings.address || '';
         document.getElementById('setShopPhone').value = shopSettings.phone || '';
         document.getElementById('setThanksMsg').value = shopSettings.thanks || '';
+
+        const stepEl = document.getElementById('setPointEarnStep');
+        const valEl = document.getElementById('setPointValueKs');
+        if (stepEl) stepEl.value = getEarnStepKs();
+        if (valEl) valEl.value = getPointValueKs();
+        applyPointRateLabels();
+
         renderManageItems();
     }
 
@@ -842,7 +1336,7 @@
             <div class="edit-item-row">
                 <input type="text" id="editName_${idx}" class="edit-name-input" value="${item.name.replace(/"/g, '&quot;')}" placeholder="ပစ္စည်းအမည်">
                 <input type="number" id="editPrice_${idx}" class="edit-price-input" value="${item.price}" min="1" placeholder="ဈေးနှုန်း">
-                <button class="btn-save-row" onclick="updateItemRow(${idx})" title="သိမ်းမည်"><i class="fas fa-check"></i></button>
+                <button type="button" class="btn-save-row" onclick="updateItemRow(${idx})" title="သိမ်းမည်"><i class="fas fa-check"></i></button>
                 <i class="fas fa-trash-alt trash-btn" onclick="deleteItem(${idx})"></i>
             </div>
         `).join('');
