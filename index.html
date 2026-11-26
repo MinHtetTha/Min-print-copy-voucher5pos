@@ -222,7 +222,7 @@
             .voucher-modal {
                 box-shadow: none !important;
                 max-width: 100% !important;
-                width: 80mm !important; /* Standard Thermal Receipt Width */
+                width: 80mm !important;
                 margin: 0 auto !important;
                 border-radius: 0 !important;
                 max-height: none !important;
@@ -456,7 +456,7 @@
         {name: "A4 တစ်ဖက်", price: 100},
         {name: "A4 နှစ်ဖက်", price: 200},
         {name: "A4 Color", price: 500},
-        {name: "Legal တစ်ဖက်", price: 300}
+        {name: "Legal တစ်ဖက်", price: 300},
         {name: "Legal နှစ်ဖက်", price: 500}
     ];
 
@@ -499,10 +499,10 @@
     }
 
     function saveShopSettings() {
-        shopSettings.name = document.getElementById('setShopName').value;
-        shopSettings.address = document.getElementById('setShopAddress').value;
-        shopSettings.phone = document.getElementById('setShopPhone').value;
-        shopSettings.thanks = document.getElementById('setThanksMsg').value || "အားပေးမှုကို အထူးကျေးဇူးတင်ရှိပါသည်။";
+        shopSettings.name = document.getElementById('setShopName').value.trim() || "Min Copy & Print";
+        shopSettings.address = document.getElementById('setShopAddress').value.trim();
+        shopSettings.phone = document.getElementById('setShopPhone').value.trim();
+        shopSettings.thanks = document.getElementById('setThanksMsg').value.trim() || "အားပေးမှုကို အထူးကျေးဇူးတင်ရှိပါသည်။";
         localStorage.setItem('min_shop_settings', JSON.stringify(shopSettings));
         applyShopSettings();
         alert("ဆိုင်အချက်အလက်များ သိမ်းဆည်းပြီးပါပြီ။");
@@ -520,15 +520,18 @@
         const dl = document.getElementById('items');
         const qb = document.getElementById('quickButtons');
         const ps = document.getElementById('pMethod');
+        const prevPay = ps.value;
         dl.innerHTML = ''; qb.innerHTML = ''; ps.innerHTML = '';
         items.forEach(item => {
             dl.innerHTML += `<option value="${item.name}">`;
-            qb.innerHTML += `<div class="q-btn" onclick="quickAdd('${item.name}', ${item.price})">
+            qb.innerHTML += `<div class="q-btn" onclick="quickAdd('${item.name.replace(/'/g, "\\'")}', ${item.price})">
                 <span class="q-name">${item.name}</span>
-                <span class="q-price">${item.price.toLocaleString()} KS</span>
+                <span class="q-price">${Number(item.price).toLocaleString()} KS</span>
             </div>`;
         });
         payMethods.forEach(m => ps.innerHTML += `<option value="${m.name}">${m.name}</option>`);
+        if (prevPay) ps.value = prevPay;
+        calc();
     }
 
     function quickAdd(n, p) {
@@ -617,6 +620,49 @@
         return { s, e, d, total };
     }
 
+    function populateVoucherModal(vData) {
+        applyShopSettings();
+        document.getElementById('vnNo').innerText = 'V-' + vData.vNo;
+        document.getElementById('vdDate').innerText = vData.date;
+
+        const custBox = document.getElementById('vCustInfo');
+        if (vData.cName || vData.cPhone) {
+            custBox.style.display = 'block';
+            document.getElementById('vnName').innerText = vData.cName || '-';
+            document.getElementById('vnPhone').innerText = vData.cPhone || '-';
+        } else {
+            custBox.style.display = 'none';
+        }
+
+        document.getElementById('vtBody').innerHTML = vData.items.map(i => `
+            <tr>
+                <td style="padding: 4px 0;">${i.n}</td>
+                <td align="center" style="padding: 4px 0;">${i.q}</td>
+                <td align="right" style="padding: 4px 0;">${Number(i.t).toLocaleString()}</td>
+            </tr>
+        `).join('');
+
+        document.getElementById('vsSub').innerText = Number(vData.sub).toLocaleString();
+        const netAdj = (vData.extra || 0) - (vData.disc || 0);
+        document.getElementById('vedExtra').innerText = (netAdj >= 0 ? '+' : '') + netAdj.toLocaleString();
+        document.getElementById('vgGrand').innerText = Number(vData.total).toLocaleString();
+        document.getElementById('vpPay').innerText = vData.pay;
+
+        const pm = payMethods.find(p => p.name === vData.pay);
+        const qrBox = document.getElementById('vQRBox');
+        if (pm && pm.qr) {
+            qrBox.style.display = 'block';
+            document.getElementById('vQRLabel').innerText = pm.name + ' QR';
+            const qrImg = document.getElementById('vQRImg');
+            qrImg.src = pm.qr;
+            qrImg.onerror = () => { qrBox.style.display = 'none'; };
+        } else {
+            qrBox.style.display = 'none';
+        }
+
+        document.getElementById('vOverlay').style.display = 'flex';
+    }
+
     function generateVoucher() {
         if(cart.length === 0) {
             alert("ဘောင်ချာထုတ်ရန် ပစ္စည်းအနည်းဆုံး တစ်ခုထည့်ပါ။");
@@ -634,51 +680,41 @@
         isNewSale = true;
 
         const vData = {
-            vNo, date: dStr, rawDate: now.toLocaleDateString(), total: res.total,
-            items: [...cart], method: pay, customer: cName || 'General',
-            phone: cPhone, extra: res.e, disc: res.d, thanks: shopSettings.thanks
+            vNo,
+            date: dStr,
+            isoDate: now.toISOString().slice(0, 10),
+            cName,
+            cPhone,
+            items: cart.map(i => ({ ...i })),
+            sub: res.s,
+            extra: res.e,
+            disc: res.d,
+            total: res.total,
+            pay
         };
 
-        renderVoucherToOverlay(vData);
-        history.push(vData);
+        history.unshift(vData);
+        vCount += 1;
         localStorage.setItem('min_history', JSON.stringify(history));
-        vCount++;
-        localStorage.setItem('min_vcount', vCount);
-        document.getElementById('vOverlay').style.display = 'flex';
+        localStorage.setItem('min_vcount', vCount.toString());
+
+        populateVoucherModal(vData);
+
+        cart = [];
+        document.getElementById('extra').value = '0';
+        document.getElementById('disc').value = '0';
+        document.getElementById('custName').value = '';
+        document.getElementById('custPhone').value = '';
+        renderCart();
     }
 
-    function renderVoucherToOverlay(h) {
-        applyShopSettings();
-        currentVoucherNo = h.vNo;
-        document.getElementById('vnNo').innerText = "Voucher: #" + h.vNo;
-        document.getElementById('vdDate').innerText = h.date;
-        document.getElementById('vsSub').innerText = h.items.reduce((acc, i) => acc + i.t, 0).toLocaleString();
-        document.getElementById('vedExtra').innerText = (h.extra - h.disc).toLocaleString();
-        document.getElementById('vgGrand').innerText = h.total.toLocaleString();
-        document.getElementById('vpPay').innerText = h.method;
-        document.getElementById('vThanksText').innerText = h.thanks || shopSettings.thanks;
-        
-        document.getElementById('vCustInfo').style.display = (h.customer !== 'General' || h.phone) ? 'block' : 'none';
-        document.getElementById('vnName').innerText = h.customer;
-        document.getElementById('vnPhone').innerText = h.phone || '-';
-        
-        document.getElementById('vtBody').innerHTML = h.items.map(i => `
-            <tr style="border-bottom: 1px dotted #ccc;">
-                <td style="padding: 5px 0;">${i.n}</td>
-                <td align="center" style="padding: 5px 0;">${i.q}</td>
-                <td align="right" style="padding: 5px 0;">${i.t.toLocaleString()}</td>
-            </tr>
-        `).join('');
-        
-        const payObj = payMethods.find(m => m.name === h.method);
-        const qrBox = document.getElementById('vQRBox');
-        if(payObj && payObj.qr) { 
-            qrBox.style.display = 'block'; 
-            document.getElementById('vQRImg').src = payObj.qr; 
-            document.getElementById('vQRLabel').innerText = `Scan to Pay (${h.method})`; 
-        } else {
-            qrBox.style.display = 'none';
-        }
+    function closeVoucher() {
+        document.getElementById('vOverlay').style.display = 'none';
+        isNewSale = false;
+    }
+
+    function closeVoucherIfOutside(e) {
+        if (e.target.id === 'vOverlay') closeVoucher();
     }
 
     function triggerPrint() {
@@ -686,117 +722,142 @@
     }
 
     async function downloadPDF() {
-        const element = document.getElementById('vCapture');
-        const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
-        const imgData = canvas.toDataURL('image/png');
-        const pdfWidth = 80;
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-        const doc = new jspdf.jsPDF({ orientation: 'p', unit: 'mm', format: [pdfWidth, Math.max(pdfHeight + 10, 120)] });
-        doc.addImage(imgData, 'PNG', 2, 2, pdfWidth - 4, 0);
-        doc.save(`Voucher_${currentVoucherNo}.pdf`);
+        const el = document.getElementById('vCapture');
+        if (!window.html2canvas || !window.jspdf) {
+            alert("PDF library မတင်နိုင်သေးပါ။ အင်တာနက်ချိတ်ဆက်မှုကို စစ်ဆေးပါ။");
+            return;
+        }
+        try {
+            const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff' });
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            const pdfWidth = 80;
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: [pdfWidth, Math.max(pdfHeight, 60)]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`Voucher-${currentVoucherNo || 'receipt'}.pdf`);
+        } catch (err) {
+            console.error(err);
+            alert("PDF ထုတ်ရာတွင် အမှားဖြစ်သွားပါသည်။");
+        }
     }
 
     function renderHistory() {
-        const today = new Date().toLocaleDateString();
-        let total = 0;
-        document.getElementById('historyList').innerHTML = history.slice().reverse().map(h => {
-            const checkDate = h.rawDate || h.date.split(' ')[0];
-            if(checkDate === today) total += h.total;
-            return `<div class="report-card">
+        const today = new Date().toISOString().slice(0, 10);
+        const todaySales = history
+            .filter(h => h.isoDate === today)
+            .reduce((sum, h) => sum + (h.total || 0), 0);
+        document.getElementById('statTotal').innerText = todaySales.toLocaleString() + ' KS';
+
+        const list = document.getElementById('historyList');
+        if (!history.length) {
+            list.innerHTML = `<p style="color:var(--muted);">အရောင်းမှတ်တမ်း မရှိသေးပါ။</p>`;
+            return;
+        }
+        list.innerHTML = history.map((h, idx) => `
+            <div class="report-card">
                 <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                    <b>#${h.vNo}</b>
-                    <span style="font-size:0.8rem; background:var(--primary-light); color:var(--primary); padding:2px 8px; border-radius:6px; font-weight:600;">${h.method}</span>
+                    <b>V-${h.vNo}</b>
+                    <span style="font-size:0.8rem; color:var(--muted);">${h.date}</span>
                 </div>
                 <div style="font-size:0.85rem; color:var(--muted); margin-bottom:8px;">
-                    <i class="fas fa-user"></i> ${h.customer} &bull; ${h.date}
+                    ${h.cName ? 'ဝယ်သူ: ' + h.cName + ' • ' : ''}${h.pay || 'Cash'}
                 </div>
-                <div style="text-align:right; color:var(--dark); font-size:1.1rem;"><b>${h.total.toLocaleString()} KS</b></div>
-            </div>`;
-        }).join('');
-        document.getElementById('statTotal').innerText = total.toLocaleString() + " KS";
-    }
-
-    function renderPdfList() {
-        document.getElementById('pdfList').innerHTML = history.slice().reverse().map((h, i) => {
-            const rIdx = history.length - 1 - i;
-            return `<div class="pdf-item">
-                <div>
-                    <b style="color:var(--dark);">#${h.vNo} - ${h.customer}</b><br>
-                    <small style="color:var(--muted);">${h.date} &bull; <b>${h.total.toLocaleString()} KS</b></small>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b style="color:var(--primary); font-size:1.05rem;">${Number(h.total).toLocaleString()} KS</b>
+                    <button class="pdf-btn btn-view" onclick="viewHistoryVoucher(${idx})"><i class="fas fa-eye"></i> ကြည့်မည်</button>
                 </div>
-                <div class="pdf-actions">
-                    <button class="pdf-btn btn-view" onclick="reViewVoucher(${rIdx})"><i class="fas fa-print"></i> ကြည့်/Print</button>
-                    <button class="pdf-btn btn-del" onclick="deleteHistory(${rIdx})"><i class="fas fa-trash"></i></button>
-                </div>
-            </div>`;
-        }).join('');
-    }
-
-    function renderSettings() {
-        document.getElementById('setShopName').value = shopSettings.name;
-        document.getElementById('setShopAddress').value = shopSettings.address;
-        document.getElementById('setShopPhone').value = shopSettings.phone;
-        document.getElementById('setThanksMsg').value = shopSettings.thanks;
-        document.getElementById('manageItemsList').innerHTML = items.map((item, i) => `
-            <div class="bill-item">
-                <span><b>${item.name}</b> - ${item.price.toLocaleString()} KS</span>
-                <i class="fas fa-trash trash-btn" onclick="deleteItem(${i})"></i>
             </div>
         `).join('');
     }
 
-    function deleteItem(i) {
-        items.splice(i, 1);
-        localStorage.setItem('min_items', JSON.stringify(items));
-        renderSettings();
-        initPOS();
+    function viewHistoryVoucher(idx) {
+        const v = history[idx];
+        if (!v) return;
+        currentVoucherNo = v.vNo;
+        populateVoucherModal(v);
+    }
+
+    function renderPdfList() {
+        const list = document.getElementById('pdfList');
+        if (!history.length) {
+            list.innerHTML = `<p style="color:var(--muted);">သိမ်းဆည်းထားသော Voucher မရှိသေးပါ။</p>`;
+            return;
+        }
+        list.innerHTML = history.map((h, idx) => `
+            <div class="pdf-item">
+                <div>
+                    <b>Voucher #${h.vNo}</b>
+                    <div style="font-size:0.8rem; color:var(--muted);">${h.date} • ${Number(h.total).toLocaleString()} KS</div>
+                </div>
+                <div class="pdf-actions">
+                    <button class="pdf-btn btn-view" onclick="viewHistoryVoucher(${idx})"><i class="fas fa-print"></i> ဖွင့်မည်</button>
+                    <button class="pdf-btn btn-del" onclick="deleteHistoryVoucher(${idx})"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function deleteHistoryVoucher(idx) {
+        if (!confirm("ဒီ Voucher မှတ်တမ်းကို ဖျက်မှာ သေချာပါသလား?")) return;
+        history.splice(idx, 1);
+        localStorage.setItem('min_history', JSON.stringify(history));
+        renderPdfList();
+        renderHistory();
+    }
+
+    function renderSettings() {
+        document.getElementById('setShopName').value = shopSettings.name || '';
+        document.getElementById('setShopAddress').value = shopSettings.address || '';
+        document.getElementById('setShopPhone').value = shopSettings.phone || '';
+        document.getElementById('setThanksMsg').value = shopSettings.thanks || '';
+        renderManageItems();
+    }
+
+    function renderManageItems() {
+        const box = document.getElementById('manageItemsList');
+        if (!items.length) {
+            box.innerHTML = `<p style="color:var(--muted); font-size:0.85rem;">ပစ္စည်းစာရင်း မရှိပါ။</p>`;
+            return;
+        }
+        box.innerHTML = items.map((item, idx) => `
+            <div class="bill-item">
+                <div class="item-info">
+                    <b>${item.name}</b>
+                    <small>${Number(item.price).toLocaleString()} KS</small>
+                </div>
+                <i class="fas fa-trash-alt trash-btn" onclick="deleteItem(${idx})"></i>
+            </div>
+        `).join('');
     }
 
     function saveNewItem() {
-        const n = document.getElementById('newIName').value.trim();
-        const p = parseInt(document.getElementById('newIPrice').value);
-        if(n && p > 0) {
-            items.push({name: n, price: p});
-            localStorage.setItem('min_items', JSON.stringify(items));
-            document.getElementById('newIName').value = '';
-            document.getElementById('newIPrice').value = '';
-            renderSettings();
-            initPOS();
+        const name = document.getElementById('newIName').value.trim();
+        const price = parseInt(document.getElementById('newIPrice').value) || 0;
+        if (!name || price <= 0) {
+            alert("ပစ္စည်းအမည်နှင့် စျေးနှုန်း မှန်ကန်စွာ ထည့်ပါ။");
+            return;
         }
+        items.push({ name, price });
+        localStorage.setItem('min_items', JSON.stringify(items));
+        document.getElementById('newIName').value = '';
+        document.getElementById('newIPrice').value = '';
+        renderManageItems();
+        initPOS();
     }
 
-    function reViewVoucher(idx) {
-        isNewSale = false;
-        renderVoucherToOverlay(history[idx]);
-        document.getElementById('vOverlay').style.display = 'flex';
+    function deleteItem(idx) {
+        items.splice(idx, 1);
+        localStorage.setItem('min_items', JSON.stringify(items));
+        renderManageItems();
+        initPOS();
     }
 
-    function deleteHistory(idx) {
-        if(confirm("ဤ Voucher မှတ်တမ်းကို ဖျက်မှာသေချာပါသလား?")) {
-            history.splice(idx, 1);
-            localStorage.setItem('min_history', JSON.stringify(history));
-            renderPdfList();
-        }
-    }
-
-    function closeVoucher() {
-        document.getElementById('vOverlay').style.display = 'none';
-        if(isNewSale) {
-            cart = [];
-            document.getElementById('custName').value = '';
-            document.getElementById('custPhone').value = '';
-            document.getElementById('extra').value = '0';
-            document.getElementById('disc').value = '0';
-            renderCart();
-            isNewSale = false;
-        }
-    }
-
-    function closeVoucherIfOutside(e) {
-        if(e.target.id === 'vOverlay') closeVoucher();
-    }
-
+    // Initial load
     initPOS();
 </script>
 </body>
