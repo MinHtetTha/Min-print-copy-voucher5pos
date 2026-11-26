@@ -168,6 +168,23 @@
         .trash-btn:hover { opacity: 1; }
 
         .summary-box { background: var(--primary-light); padding: 16px; border-radius: 14px; border: 1px solid #fed7aa; }
+        .credit-box {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-top: 8px;
+        }
+        .credit-due-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #b45309;
+            margin-top: 6px;
+        }
+
         .grand-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #fdba74; }
         .grand-total-row span:first-child { font-weight: 700; color: var(--dark); font-size: 1.1rem; }
         .grand-total-val { font-size: 1.6rem; font-weight: 800; color: #c2410c; }
@@ -212,14 +229,14 @@
             color: var(--dark);
         }
 
-        .customer-board {
+        .customer-board, .monthly-breakdown-board {
             background: white;
             padding: 20px;
             border-radius: 16px;
             border: 1px solid var(--border);
             margin-bottom: 20px;
         }
-        .customer-board h4 {
+        .customer-board h4, .monthly-breakdown-board h4 {
             color: var(--dark);
             font-size: 1rem;
             margin-bottom: 14px;
@@ -252,9 +269,57 @@
             font-size: 0.78rem;
             border: 1px solid #fed7aa;
         }
+        .month-pill {
+            background: #ecfdf5;
+            color: #047857;
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.78rem;
+            border: 1px solid #a7f3d0;
+        }
+        .pay-pill {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.78rem;
+            border: 1px solid #bfdbfe;
+        }
+        .status-paid {
+            background: #ecfdf5;
+            color: #047857;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            border: 1px solid #a7f3d0;
+        }
+        .status-credit {
+            background: #fef2f2;
+            color: #b91c1c;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            border: 1px solid #fecaca;
+        }
+        .btn-settle {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-settle:hover { background: #059669; }
 
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; }
         .report-card { background: white; padding: 16px; border-radius: 14px; border: 1px solid var(--border); border-left: 4px solid var(--primary); }
+        .report-card.has-due { border-left-color: var(--danger); }
         
         .pdf-item { display: flex; align-items: center; justify-content: space-between; background: white; padding: 16px; border-radius: 14px; border: 1px solid var(--border); }
         .pdf-actions { display: flex; gap: 8px; }
@@ -450,6 +515,26 @@
                     </div>
                 </div>
 
+                <div class="form-group" style="margin-bottom: 6px;">
+                    <label>ငွေပေးချေမှု အခြေအနေ</label>
+                    <select id="payStatus" onchange="onPayStatusChange()">
+                        <option value="Paid">ငွေရှင်းပြီး (Paid)</option>
+                        <option value="Partial">စရံပေး / တစ်စိတ်တစ်ပိုင်း (Partial)</option>
+                        <option value="Unpaid">အကြွေး (Unpaid)</option>
+                    </select>
+                </div>
+
+                <div id="creditFields" class="credit-box" style="display:none;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>ယခုပေးသွင်းငွေ (KS)</label>
+                        <input type="number" id="paidInput" value="0" min="0" oninput="calc()">
+                    </div>
+                    <div class="credit-due-row">
+                        <span>ကျန်အကြွေးငွေ:</span>
+                        <span><span id="duePreview">0</span> KS</span>
+                    </div>
+                </div>
+
                 <div class="grand-total-row">
                     <span>ကျသင့်ငွေ စုစုပေါင်း</span>
                     <span class="grand-total-val"><span id="gTotal">0</span> KS</span>
@@ -487,6 +572,56 @@
                     <i class="fas fa-calendar-alt" style="color:var(--success);"></i>
                 </div>
                 <div id="statMonthly" class="sales-stat-val">0 KS</div>
+            </div>
+        </div>
+
+        <div class="monthly-breakdown-board">
+            <h4><i class="fas fa-hand-holding-usd" style="color:var(--danger);"></i> လက်ကျန်အကြွေးစာရင်း (Unpaid / Partial Credits)</h4>
+            <div class="customer-table-wrap">
+                <table class="customer-table">
+                    <thead>
+                        <tr>
+                            <th>ဘောင်ချာ</th>
+                            <th>ဝယ်ယူသူ / ဖုန်း</th>
+                            <th>ကျသင့်ငွေ</th>
+                            <th>ကျန်ငွေ</th>
+                            <th>လုပ်ဆောင်ချက်</th>
+                        </tr>
+                    </thead>
+                    <tbody id="creditListBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="monthly-breakdown-board">
+            <h4><i class="fas fa-calendar-check" style="color:var(--success);"></i> လအလိုက် ဝင်ငွေမှတ်တမ်း (Monthly Breakdown)</h4>
+            <div class="customer-table-wrap">
+                <table class="customer-table">
+                    <thead>
+                        <tr>
+                            <th>လ / နှစ်</th>
+                            <th>ဘောင်ချာအရေအတွက်</th>
+                            <th>လစဉ် ဝင်ငွေ စုစုပေါင်း</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthlyBreakdownBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="monthly-breakdown-board">
+            <h4><i class="fas fa-wallet" style="color:#2563eb;"></i> ငွေပေးချေမှုနည်းလမ်းအလိုက် ဝင်ငွေ</h4>
+            <div class="customer-table-wrap">
+                <table class="customer-table">
+                    <thead>
+                        <tr>
+                            <th>ငွေပေးချေမှု</th>
+                            <th>ဘောင်ချာအရေအတွက်</th>
+                            <th>စုစုပေါင်း ဝင်ငွေ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentBreakdownBody"></tbody>
+                </table>
             </div>
         </div>
 
@@ -601,7 +736,8 @@
                     <div style="font-size:16px; font-weight:bold; margin: 4px 0; border-top: 1px dashed #000; padding-top: 4px;">
                         TOTAL: <span id="vgGrand">0</span> KS
                     </div>
-                    Payment: <b id="vpPay"></b>
+                    Payment: <b id="vpPay"></b> (<span id="vpStatusText">Paid</span>)<br>
+                    <span id="vDueLine" style="display:none; font-weight:bold;">Due Credit: <span id="vpDue">0</span> KS</span>
                 </div>
                 <div id="vQRBox" style="text-align:center; margin-top:12px; display:none; border-top:1px dashed #000; padding-top:10px;">
                     <p id="vQRLabel" style="font-size:11px; margin-bottom:5px; font-weight: bold;"></p>
@@ -679,6 +815,22 @@
     let vCount = parseInt(localStorage.getItem('min_vcount')) || 1;
     let currentVoucherNo = "";
     let isNewSale = false;
+
+    function getVoucherCollectedAmount(h) {
+        const total = Number(h.total) || 0;
+        if (h.dueAmt === undefined || h.dueAmt === null) {
+            return total;
+        }
+        const due = Math.max(0, Number(h.dueAmt) || 0);
+        return Math.max(0, total - due);
+    }
+
+    function getVoucherDueAmount(h) {
+        if (h.dueAmt === undefined || h.dueAmt === null) {
+            return 0;
+        }
+        return Math.max(0, Number(h.dueAmt) || 0);
+    }
 
     function getEarnStepKs() {
         const val = parseInt(pointSettings.earnStepKs, 10);
@@ -916,6 +1068,29 @@
         calc();
     }
 
+    function onPayStatusChange() {
+        const status = document.getElementById('payStatus')?.value || 'Paid';
+        const creditBox = document.getElementById('creditFields');
+        const paidInput = document.getElementById('paidInput');
+        const gTotal = parseInt((document.getElementById('gTotal')?.innerText || '0').replace(/,/g, ''), 10) || 0;
+
+        if (!creditBox || !paidInput) return;
+
+        if (status === 'Paid') {
+            creditBox.style.display = 'none';
+            paidInput.value = gTotal;
+        } else if (status === 'Unpaid') {
+            creditBox.style.display = 'block';
+            paidInput.value = '0';
+        } else {
+            creditBox.style.display = 'block';
+            if (parseInt(paidInput.value, 10) >= gTotal) {
+                paidInput.value = '0';
+            }
+        }
+        calc();
+    }
+
     function initPOS() {
         applyShopSettings();
         applyPointRateLabels();
@@ -1020,7 +1195,34 @@
         const d = parseInt(document.getElementById('disc').value) || 0;
         const total = Math.max(0, s + e - d);
         document.getElementById('gTotal').innerText = total.toLocaleString();
-        return { s, e, d, total };
+
+        const status = document.getElementById('payStatus')?.value || 'Paid';
+        const paidInput = document.getElementById('paidInput');
+        const duePreview = document.getElementById('duePreview');
+
+        let paidAmt = total;
+        let dueAmt = 0;
+
+        if (status === 'Unpaid') {
+            paidAmt = 0;
+            dueAmt = total;
+            if (paidInput) paidInput.value = '0';
+        } else if (status === 'Partial') {
+            let rawPaid = parseInt(paidInput?.value, 10);
+            if (isNaN(rawPaid) || rawPaid < 0) rawPaid = 0;
+            if (rawPaid > total) {
+                rawPaid = total;
+                if (paidInput) paidInput.value = rawPaid;
+            }
+            paidAmt = rawPaid;
+            dueAmt = Math.max(0, total - paidAmt);
+        }
+
+        if (duePreview) {
+            duePreview.innerText = dueAmt.toLocaleString();
+        }
+
+        return { s, e, d, total, status, paidAmt, dueAmt };
     }
 
     function populateVoucherModal(vData) {
@@ -1050,6 +1252,16 @@
         document.getElementById('vedExtra').innerText = (netAdj >= 0 ? '+' : '') + netAdj.toLocaleString();
         document.getElementById('vgGrand').innerText = Number(vData.total).toLocaleString();
         document.getElementById('vpPay').innerText = vData.pay;
+        document.getElementById('vpStatusText').innerText = vData.payStatus || 'Paid';
+
+        const dueVal = getVoucherDueAmount(vData);
+        const dueLine = document.getElementById('vDueLine');
+        if (dueVal > 0) {
+            dueLine.style.display = 'inline';
+            document.getElementById('vpDue').innerText = dueVal.toLocaleString();
+        } else {
+            dueLine.style.display = 'none';
+        }
 
         const pm = payMethods.find(p => p.name === vData.pay);
         const qrBox = document.getElementById('vQRBox');
@@ -1075,6 +1287,13 @@
         const pay = document.getElementById('pMethod').value;
         const cName = document.getElementById('custName').value.trim();
         const cPhone = document.getElementById('custPhone').value.trim();
+
+        if ((res.status === 'Unpaid' || res.status === 'Partial') && !cName && !cPhone) {
+            alert("အကြွေးစာရင်း မှတ်သားရန် ဝယ်ယူသူအမည် သို့မဟုတ် ဖုန်းနံပါတ် ထည့်ပေးပါ။");
+            document.getElementById('custName').focus();
+            return;
+        }
+
         const vNo = vCount.toString().padStart(4, '0');
         const now = new Date();
         const dStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -1098,6 +1317,9 @@
             disc: res.d,
             total: res.total,
             pay,
+            payStatus: res.status,
+            paidAmt: res.paidAmt,
+            dueAmt: res.dueAmt,
             usedPoints,
             earnedPoints
         };
@@ -1133,11 +1355,51 @@
         document.getElementById('disc').value = '0';
         document.getElementById('custName').value = '';
         document.getElementById('custPhone').value = '';
+        if (document.getElementById('payStatus')) {
+            document.getElementById('payStatus').value = 'Paid';
+        }
+        if (document.getElementById('paidInput')) {
+            document.getElementById('paidInput').value = '0';
+        }
+        if (document.getElementById('creditFields')) {
+            document.getElementById('creditFields').style.display = 'none';
+        }
         if (document.getElementById('redeemPoints')) {
             document.getElementById('redeemPoints').value = '0';
         }
         refreshCustomerPointUI();
         renderCart();
+    }
+
+    function settleCredit(idx) {
+        const v = history[idx];
+        if (!v) return;
+        const currentDue = getVoucherDueAmount(v);
+        if (currentDue <= 0) {
+            alert("ဒီဘောင်ချာက ငွေရှင်းပြီးသား ဖြစ်ပါသည်။");
+            return;
+        }
+
+        const inputStr = prompt(`V-${v.vNo} (${v.cName || 'Customer'}) အတွက် လက်ကျန်အကြွေး ${currentDue.toLocaleString()} KS ရှိပါသည်။\nယခု ပေးသွင်းမည့် ငွေပမာဏ ထည့်ပါ:`, currentDue.toString());
+        if (inputStr === null) return;
+
+        const payNow = parseInt(inputStr, 10);
+        if (isNaN(payNow) || payNow <= 0) {
+            alert("0 ထက်ကြီးတဲ့ ဂဏန်းမှန် ထည့်ပေးပါ။");
+            return;
+        }
+
+        const applied = Math.min(currentDue, payNow);
+        const remain = Math.max(0, currentDue - applied);
+
+        v.dueAmt = remain;
+        v.paidAmt = (Number(v.total) || 0) - remain;
+        v.payStatus = remain === 0 ? 'Paid' : 'Partial';
+
+        history[idx] = v;
+        localStorage.setItem('min_history', JSON.stringify(history));
+        renderHistory();
+        alert(`ငွေ ${applied.toLocaleString()} KS ရှင်းပြီးပါပြီ။ လက်ကျန်အကြွေး: ${remain.toLocaleString()} KS`);
     }
 
     function closeVoucher() {
@@ -1189,6 +1451,98 @@
         return new Date(y, m, d);
     }
 
+    function renderCreditList() {
+        const tbody = document.getElementById('creditListBody');
+        if (!tbody) return;
+
+        const creditRows = history
+            .map((h, idx) => ({ h, idx, due: getVoucherDueAmount(h) }))
+            .filter(item => item.due > 0);
+
+        if (!creditRows.length) {
+            tbody.innerHTML = `<tr><td colspan="5" style="color:var(--muted); text-align:center;">လက်ကျန်အကြွေး မရှိပါ။</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = creditRows.map(({ h, idx, due }) => `
+            <tr>
+                <td><b>V-${h.vNo}</b><div style="font-size:0.75rem; color:var(--muted);">${h.date}</div></td>
+                <td><b>${h.cName || '-'}</b>${h.cPhone ? `<div style="font-size:0.78rem; color:var(--muted);">${h.cPhone}</div>` : ''}</td>
+                <td>${Number(h.total || 0).toLocaleString()} KS</td>
+                <td><span class="status-credit">${due.toLocaleString()} KS</span></td>
+                <td><button type="button" class="btn-settle" onclick="settleCredit(${idx})"><i class="fas fa-check-circle"></i> ငွေရှင်းမည်</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function renderMonthlyBreakdown() {
+        const tbody = document.getElementById('monthlyBreakdownBody');
+        if (!tbody) return;
+
+        const monthMap = {};
+        history.forEach(h => {
+            const dObj = parseLocalDate(h.isoDate);
+            if (!dObj) return;
+            const y = dObj.getFullYear();
+            const m = String(dObj.getMonth() + 1).padStart(2, '0');
+            const key = `${y}-${m}`;
+
+            if (!monthMap[key]) {
+                monthMap[key] = {
+                    key,
+                    label: `${y} / ${m} လ`,
+                    count: 0,
+                    total: 0
+                };
+            }
+            monthMap[key].count += 1;
+            monthMap[key].total += getVoucherCollectedAmount(h);
+        });
+
+        const rows = Object.values(monthMap).sort((a, b) => b.key.localeCompare(a.key));
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="3" style="color:var(--muted); text-align:center;">လအလိုက် ဝင်ငွေမှတ်တမ်း မရှိသေးပါ။</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = rows.map(r => `
+            <tr>
+                <td><span class="month-pill">${r.label}</span></td>
+                <td>${r.count.toLocaleString()} စောင်</td>
+                <td><b style="color:var(--dark);">${r.total.toLocaleString()} KS</b></td>
+            </tr>
+        `).join('');
+    }
+
+    function renderPaymentBreakdown() {
+        const tbody = document.getElementById('paymentBreakdownBody');
+        if (!tbody) return;
+
+        const payMap = {};
+        history.forEach(h => {
+            const method = (h.pay || 'Cash').trim() || 'Cash';
+            if (!payMap[method]) {
+                payMap[method] = { method, count: 0, total: 0 };
+            }
+            payMap[method].count += 1;
+            payMap[method].total += getVoucherCollectedAmount(h);
+        });
+
+        const rows = Object.values(payMap).sort((a, b) => b.total - a.total);
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="3" style="color:var(--muted); text-align:center;">ငွေပေးချေမှု မှတ်တမ်း မရှိသေးပါ။</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = rows.map(r => `
+            <tr>
+                <td><span class="pay-pill">${r.method}</span></td>
+                <td>${r.count.toLocaleString()} စောင်</td>
+                <td><b style="color:var(--dark);">${r.total.toLocaleString()} KS</b></td>
+            </tr>
+        `).join('');
+    }
+
     function renderTopCustomers() {
         const tbody = document.getElementById('topCustomersBody');
         if (!tbody) return;
@@ -1229,7 +1583,7 @@
         let monthlyTotal = 0;
 
         history.forEach(h => {
-            const amt = Number(h.total) || 0;
+            const amt = getVoucherCollectedAmount(h);
             const dObj = parseLocalDate(h.isoDate);
             if (!dObj) return;
 
@@ -1252,6 +1606,9 @@
         if (weeklyEl) weeklyEl.innerText = weeklyTotal.toLocaleString() + ' KS';
         if (monthlyEl) monthlyEl.innerText = monthlyTotal.toLocaleString() + ' KS';
 
+        renderCreditList();
+        renderMonthlyBreakdown();
+        renderPaymentBreakdown();
         renderTopCustomers();
 
         const list = document.getElementById('historyList');
@@ -1259,21 +1616,28 @@
             list.innerHTML = `<p style="color:var(--muted);">အရောင်းမှတ်တမ်း မရှိသေးပါ။</p>`;
             return;
         }
-        list.innerHTML = history.map((h, idx) => `
-            <div class="report-card">
-                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                    <b>V-${h.vNo}</b>
-                    <span style="font-size:0.8rem; color:var(--muted);">${h.date}</span>
+        list.innerHTML = history.map((h, idx) => {
+            const dueVal = getVoucherDueAmount(h);
+            const badgeHtml = dueVal > 0
+                ? `<span class="status-credit">ကျန်ငွေ ${dueVal.toLocaleString()} KS</span>`
+                : `<span class="status-paid">Paid</span>`;
+            return `
+                <div class="report-card ${dueVal > 0 ? 'has-due' : ''}">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <b>V-${h.vNo}</b>
+                        <span style="font-size:0.8rem; color:var(--muted);">${h.date}</span>
+                    </div>
+                    <div style="font-size:0.85rem; color:var(--muted); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <span>${h.cName ? 'ဝယ်သူ: ' + h.cName + ' • ' : ''}${h.pay || 'Cash'}</span>
+                        ${badgeHtml}
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <b style="color:var(--primary); font-size:1.05rem;">${Number(h.total).toLocaleString()} KS</b>
+                        <button class="pdf-btn btn-view" onclick="viewHistoryVoucher(${idx})"><i class="fas fa-eye"></i> ကြည့်မည်</button>
+                    </div>
                 </div>
-                <div style="font-size:0.85rem; color:var(--muted); margin-bottom:8px;">
-                    ${h.cName ? 'ဝယ်သူ: ' + h.cName + ' • ' : ''}${h.pay || 'Cash'}
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <b style="color:var(--primary); font-size:1.05rem;">${Number(h.total).toLocaleString()} KS</b>
-                    <button class="pdf-btn btn-view" onclick="viewHistoryVoucher(${idx})"><i class="fas fa-eye"></i> ကြည့်မည်</button>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function viewHistoryVoucher(idx) {
