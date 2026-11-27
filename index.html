@@ -236,6 +236,15 @@
             border: 1px solid var(--border);
             margin-bottom: 20px;
         }
+        .board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .board-header h4 { margin-bottom: 0 !important; }
         .customer-board h4, .monthly-breakdown-board h4 {
             color: var(--dark);
             font-size: 1rem;
@@ -316,15 +325,42 @@
             cursor: pointer;
         }
         .btn-settle:hover { background: #059669; }
+        .btn-mini-view {
+            background: #e0f2fe;
+            color: #0284c7;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-mini-view:hover { background: #bae6fd; }
+        .btn-closing {
+            background: var(--dark);
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 9px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-closing:hover { background: #0f172a; }
 
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; }
         .report-card { background: white; padding: 16px; border-radius: 14px; border: 1px solid var(--border); border-left: 4px solid var(--primary); }
         .report-card.has-due { border-left-color: var(--danger); }
+        .card-actions-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
         
         .pdf-item { display: flex; align-items: center; justify-content: space-between; background: white; padding: 16px; border-radius: 14px; border: 1px solid var(--border); }
         .pdf-actions { display: flex; gap: 8px; }
-        .pdf-btn { padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        .pdf-btn { padding: 7px 10px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
         .btn-view { background: #e0f2fe; color: #0284c7; }
+        .btn-edit { background: #fef3c7; color: #b45309; }
         .btn-del { background: #fee2e2; color: #dc2626; }
 
         .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -380,6 +416,46 @@
         .btn-pdf-download { background: #2563eb; color: white; }
         .btn-pdf-download:hover { background: #1d4ed8; }
 
+        /* Action Modals (Edit Voucher, Customer Detail, Daily Closing) */
+        .action-modal-box {
+            background: white;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            border-radius: 18px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        .action-modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .action-modal-header h3 { font-size: 1.05rem; color: var(--dark); font-weight: 700; }
+        .action-modal-body { padding: 18px 20px; overflow-y: auto; }
+        .action-modal-footer {
+            padding: 12px 20px;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .closing-summary-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            margin-top: 12px;
+        }
+
         /* Responsive Mobile Adjustment */
         @media (max-width: 850px) {
             body { height: auto; overflow: auto; padding-bottom: 70px; }
@@ -396,7 +472,7 @@
         @media print {
             @page { margin: 0; size: auto; }
             body { background: white !important; margin: 0 !important; padding: 0 !important; height: auto !important; overflow: visible !important; }
-            header, .main-wrapper, .top-nav, .close-v, .voucher-actions { display: none !important; }
+            header, .main-wrapper, .top-nav, .close-v, .voucher-actions, #actionOverlay { display: none !important; }
             
             .overlay {
                 display: block !important;
@@ -549,6 +625,11 @@
 
     <!-- 2. HISTORY VIEW -->
     <div id="historyView" class="sub-container hidden">
+        <div class="board-header">
+            <div style="font-weight:700; color:var(--dark); font-size:1.05rem;"><i class="fas fa-chart-line" style="color:var(--primary);"></i> အရောင်းအနှစ်ချုပ်နှင့် မှတ်တမ်းများ</div>
+            <button type="button" class="btn-closing" onclick="openDailyClosingModal()"><i class="fas fa-file-invoice-dollar"></i> နေ့စဉ် စာရင်းပိတ်</button>
+        </div>
+
         <div class="sales-summary-grid">
             <div class="sales-stat-card">
                 <div class="sales-stat-label">
@@ -636,6 +717,7 @@
                             <th>အကြိမ်ရေ</th>
                             <th>စုစုပေါင်း ဝယ်ယူငွေ</th>
                             <th>လက်ရှိ Point</th>
+                            <th>မှတ်တမ်း</th>
                         </tr>
                     </thead>
                     <tbody id="topCustomersBody"></tbody>
@@ -755,6 +837,20 @@
     </div>
 </div>
 
+<!-- ACTION MODAL (Edit Voucher / Customer Detail / Daily Closing) -->
+<div id="actionOverlay" class="overlay" onclick="closeActionModalIfOutside(event)">
+    <div class="action-modal-box" onclick="event.stopPropagation()">
+        <div class="action-modal-header">
+            <h3 id="actionModalTitle">မှတ်တမ်း</h3>
+            <span class="close-v" style="position:static; font-size:24px;" onclick="closeActionModal()">&times;</span>
+        </div>
+        <div id="actionModalBody" class="action-modal-body"></div>
+        <div id="actionModalFooter" class="action-modal-footer">
+            <button type="button" class="pdf-btn btn-del" onclick="closeActionModal()">ပိတ်မည်</button>
+        </div>
+    </div>
+</div>
+
 <script>
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error:', err));
@@ -842,6 +938,49 @@
         return (!isNaN(val) && val > 0) ? val : DEFAULT_POINT_SETTINGS.valueKs;
     }
 
+    function recalculateCustomersFromHistory() {
+        const rebuilt = {};
+        const stepKs = getEarnStepKs();
+        const chronological = [...history].reverse();
+
+        chronological.forEach(h => {
+            const cName = (h.cName || '').trim();
+            const cPhone = (h.cPhone || '').trim();
+            const key = getCustomerKey(cName, cPhone);
+            if (!key) return;
+
+            const totalAmt = Math.max(0, Number(h.total) || 0);
+            const earned = Math.floor(totalAmt / stepKs);
+
+            if (!rebuilt[key]) {
+                rebuilt[key] = {
+                    name: cName || 'Customer',
+                    phone: cPhone || '',
+                    orders: 0,
+                    totalSpent: 0,
+                    points: 0
+                };
+            }
+
+            const prevPts = rebuilt[key].points || 0;
+            const requestedUsed = Math.max(0, parseInt(h.usedPoints, 10) || 0);
+            const actualUsed = Math.min(prevPts, requestedUsed);
+
+            h.usedPoints = actualUsed;
+            h.earnedPoints = earned;
+
+            rebuilt[key].name = cName || rebuilt[key].name;
+            rebuilt[key].phone = cPhone || rebuilt[key].phone;
+            rebuilt[key].orders += 1;
+            rebuilt[key].totalSpent += totalAmt;
+            rebuilt[key].points = Math.max(0, prevPts - actualUsed + earned);
+        });
+
+        customersData = rebuilt;
+        localStorage.setItem('min_customers', JSON.stringify(customersData));
+        localStorage.setItem('min_history', JSON.stringify(history));
+    }
+
     function applyPointRateLabels() {
         const step = getEarnStepKs();
         const valKs = getPointValueKs();
@@ -879,6 +1018,7 @@
         pointSettings = { earnStepKs: newStep, valueKs: newVal };
         localStorage.setItem('min_point_settings', JSON.stringify(pointSettings));
 
+        recalculateCustomersFromHistory();
         applyPointRateLabels();
         refreshCustomerPointUI();
         onRedeemPointsChange();
@@ -967,18 +1107,14 @@
                 if (parsed.pointSettings && typeof parsed.pointSettings === "object") {
                     pointSettings = { ...DEFAULT_POINT_SETTINGS, ...parsed.pointSettings };
                 }
-                if (parsed.customersData && typeof parsed.customersData === "object") {
-                    customersData = parsed.customersData;
-                }
                 const nextCount = parseInt(parsed.vCount, 10);
                 vCount = (!isNaN(nextCount) && nextCount > 0) ? nextCount : (history.length + 1);
 
                 localStorage.setItem("min_items", JSON.stringify(items));
-                localStorage.setItem("min_history", JSON.stringify(history));
                 localStorage.setItem("min_shop_settings", JSON.stringify(shopSettings));
                 localStorage.setItem("min_point_settings", JSON.stringify(pointSettings));
-                localStorage.setItem("min_customers", JSON.stringify(customersData));
                 localStorage.setItem("min_vcount", vCount.toString());
+                recalculateCustomersFromHistory();
 
                 applyShopSettings();
                 applyPointRateLabels();
@@ -1303,7 +1439,6 @@
 
         const usedPoints = Math.max(0, parseInt(document.getElementById('redeemPoints')?.value, 10) || 0);
         const earnedPoints = Math.floor((res.total || 0) / getEarnStepKs());
-        const custKey = getCustomerKey(cName, cPhone);
 
         const vData = {
             vNo,
@@ -1324,29 +1459,10 @@
             earnedPoints
         };
 
-        if (custKey) {
-            const prev = customersData[custKey] || {
-                name: cName || 'Customer',
-                phone: cPhone || '',
-                orders: 0,
-                totalSpent: 0,
-                points: 0
-            };
-            const safeUsed = Math.min(prev.points || 0, usedPoints);
-            vData.usedPoints = safeUsed;
-            prev.name = cName || prev.name;
-            prev.phone = cPhone || prev.phone;
-            prev.orders = (prev.orders || 0) + 1;
-            prev.totalSpent = (prev.totalSpent || 0) + (res.total || 0);
-            prev.points = Math.max(0, (prev.points || 0) - safeUsed + earnedPoints);
-            customersData[custKey] = prev;
-            localStorage.setItem('min_customers', JSON.stringify(customersData));
-        }
-
         history.unshift(vData);
         vCount += 1;
-        localStorage.setItem('min_history', JSON.stringify(history));
         localStorage.setItem('min_vcount', vCount.toString());
+        recalculateCustomersFromHistory();
 
         populateVoucherModal(vData);
 
@@ -1397,9 +1513,250 @@
         v.payStatus = remain === 0 ? 'Paid' : 'Partial';
 
         history[idx] = v;
-        localStorage.setItem('min_history', JSON.stringify(history));
+        recalculateCustomersFromHistory();
         renderHistory();
         alert(`ငွေ ${applied.toLocaleString()} KS ရှင်းပြီးပါပြီ။ လက်ကျန်အကြွေး: ${remain.toLocaleString()} KS`);
+    }
+
+    function openActionModal(title, bodyHtml, footerHtml) {
+        document.getElementById('actionModalTitle').innerText = title;
+        document.getElementById('actionModalBody').innerHTML = bodyHtml;
+        if (footerHtml) {
+            document.getElementById('actionModalFooter').innerHTML = footerHtml;
+        } else {
+            document.getElementById('actionModalFooter').innerHTML = `<button type="button" class="pdf-btn btn-del" onclick="closeActionModal()">ပိတ်မည်</button>`;
+        }
+        document.getElementById('actionOverlay').style.display = 'flex';
+    }
+
+    function closeActionModal() {
+        document.getElementById('actionOverlay').style.display = 'none';
+    }
+
+    function closeActionModalIfOutside(e) {
+        if (e.target.id === 'actionOverlay') closeActionModal();
+    }
+
+    function openEditVoucherModal(idx) {
+        const v = history[idx];
+        if (!v) return;
+        const sub = Number(v.sub) || v.items.reduce((s, i) => s + (Number(i.t) || 0), 0);
+        const extra = Number(v.extra) || 0;
+        const disc = Number(v.disc) || 0;
+        const due = getVoucherDueAmount(v);
+        const status = v.payStatus || (due > 0 ? 'Partial' : 'Paid');
+        const payOptionsHtml = payMethods.map(m => `<option value="${m.name}" ${(v.pay || 'Cash') === m.name ? 'selected' : ''}>${m.name}</option>`).join('');
+
+        const bodyHtml = `
+            <div class="form-row">
+                <div class="form-group"><label>ဝယ်ယူသူအမည်</label><input type="text" id="editVName" value="${(v.cName || '').replace(/"/g, '&quot;')}"></div>
+                <div class="form-group"><label>ဖုန်းနံပါတ်</label><input type="tel" id="editVPhone" value="${(v.cPhone || '').replace(/"/g, '&quot;')}"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>ဝန်ဆောင်ခ (+)</label><input type="number" id="editVExtra" value="${extra}" oninput="recalcEditVoucher(${sub})"></div>
+                <div class="form-group"><label>လျှော့ဈေး (-)</label><input type="number" id="editVDisc" value="${disc}" oninput="recalcEditVoucher(${sub})"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>ငွေပေးချေမှု</label><select id="editVPay">${payOptionsHtml}</select></div>
+                <div class="form-group">
+                    <label>အခြေအနေ</label>
+                    <select id="editVStatus" onchange="recalcEditVoucher(${sub})">
+                        <option value="Paid" ${status === 'Paid' ? 'selected' : ''}>Paid</option>
+                        <option value="Partial" ${status === 'Partial' ? 'selected' : ''}>Partial</option>
+                        <option value="Unpaid" ${status === 'Unpaid' ? 'selected' : ''}>Unpaid</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom:6px;">
+                <label>ကျန်အကြွေးငွေ (KS)</label>
+                <input type="number" id="editVDue" value="${due}" min="0">
+            </div>
+            <div style="font-size:0.9rem; font-weight:700; color:var(--dark); margin-top:8px;">
+                Subtotal: ${sub.toLocaleString()} KS | ကျသင့်ငွေသစ်: <span id="editVTotalPreview">${Math.max(0, sub + extra - disc).toLocaleString()}</span> KS
+            </div>
+        `;
+        const footerHtml = `
+            <button type="button" class="pdf-btn btn-del" onclick="closeActionModal()">မလုပ်တော့ပါ</button>
+            <button type="button" class="btn-save-row" style="padding:8px 14px;" onclick="saveEditedVoucher(${idx}, ${sub})"><i class="fas fa-save"></i> ပြင်ဆင်ချက် သိမ်းမည်</button>
+        `;
+        openActionModal(`ဘောင်ချာ V-${v.vNo} ပြင်ဆင်ရန်`, bodyHtml, footerHtml);
+    }
+
+    function recalcEditVoucher(sub) {
+        const extra = parseInt(document.getElementById('editVExtra')?.value, 10) || 0;
+        const disc = parseInt(document.getElementById('editVDisc')?.value, 10) || 0;
+        const total = Math.max(0, sub + extra - disc);
+        const totalEl = document.getElementById('editVTotalPreview');
+        if (totalEl) totalEl.innerText = total.toLocaleString();
+
+        const status = document.getElementById('editVStatus')?.value || 'Paid';
+        const dueInput = document.getElementById('editVDue');
+        if (dueInput) {
+            if (status === 'Paid') dueInput.value = '0';
+            else if (status === 'Unpaid') dueInput.value = String(total);
+        }
+    }
+
+    function saveEditedVoucher(idx, sub) {
+        const v = history[idx];
+        if (!v) return;
+
+        const cName = (document.getElementById('editVName')?.value || '').trim();
+        const cPhone = (document.getElementById('editVPhone')?.value || '').trim();
+        const extra = parseInt(document.getElementById('editVExtra')?.value, 10) || 0;
+        const disc = parseInt(document.getElementById('editVDisc')?.value, 10) || 0;
+        const pay = document.getElementById('editVPay')?.value || 'Cash';
+        const status = document.getElementById('editVStatus')?.value || 'Paid';
+        const total = Math.max(0, sub + extra - disc);
+
+        let due = parseInt(document.getElementById('editVDue')?.value, 10);
+        if (isNaN(due) || due < 0) due = 0;
+        if (status === 'Paid') due = 0;
+        else if (status === 'Unpaid') due = total;
+        else if (due > total) due = total;
+
+        v.cName = cName;
+        v.cPhone = cPhone;
+        v.sub = sub;
+        v.extra = extra;
+        v.disc = disc;
+        v.total = total;
+        v.pay = pay;
+        v.payStatus = due === 0 ? 'Paid' : status;
+        v.dueAmt = due;
+        v.paidAmt = Math.max(0, total - due);
+
+        history[idx] = v;
+        recalculateCustomersFromHistory();
+        closeActionModal();
+        renderHistory();
+        renderPdfList();
+        alert(`ဘောင်ချာ V-${v.vNo} ကို ပြင်ဆင်ပြီးပါပြီ။`);
+    }
+
+    function openCustomerDetailModal(encodedKey) {
+        const key = decodeURIComponent(encodedKey);
+        const cust = customersData[key];
+        if (!cust) return;
+
+        const matched = history.filter(h => getCustomerKey(h.cName, h.cPhone) === key);
+        const totalDue = matched.reduce((sum, h) => sum + getVoucherDueAmount(h), 0);
+
+        const rowsHtml = matched.length
+            ? matched.map(h => {
+                const due = getVoucherDueAmount(h);
+                return `
+                    <tr>
+                        <td><b>V-${h.vNo}</b><div style="font-size:0.75rem; color:var(--muted);">${h.date}</div></td>
+                        <td>${Number(h.total || 0).toLocaleString()} KS</td>
+                        <td>${due > 0 ? `<span class="status-credit">${due.toLocaleString()} KS</span>` : `<span class="status-paid">Paid</span>`}</td>
+                        <td>+${Number(h.earnedPoints || 0)} pts</td>
+                    </tr>
+                `;
+            }).join('')
+            : `<tr><td colspan="4" style="text-align:center; color:var(--muted);">ဘောင်ချာမှတ်တမ်း မရှိပါ။</td></tr>`;
+
+        const bodyHtml = `
+            <div style="margin-bottom:12px; font-size:0.9rem; line-height:1.7;">
+                <div><b>ဝယ်ယူသူ:</b> ${cust.name || '-'} (${cust.phone || '-'})</div>
+                <div><b>ဝယ်ယူမှု စုစုပေါင်း:</b> ${Number(cust.totalSpent || 0).toLocaleString()} KS (${cust.orders || 0} ကြိမ်) | <b>လက်ရှိ Point:</b> <span class="point-badge">${Number(cust.points || 0)} pts</span></div>
+                <div><b>လက်ကျန်အကြွေး:</b> <b style="color:${totalDue > 0 ? 'var(--danger)' : 'var(--success)'};">${totalDue.toLocaleString()} KS</b></div>
+            </div>
+            <div class="customer-table-wrap">
+                <table class="customer-table">
+                    <thead>
+                        <tr>
+                            <th>ဘောင်ချာ</th>
+                            <th>ကျသင့်ငွေ</th>
+                            <th>အခြေအနေ</th>
+                            <th>ရရှိ Point</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            </div>
+        `;
+        openActionModal(`Customer မှတ်တမ်း - ${cust.name || 'Customer'}`, bodyHtml);
+    }
+
+    function openDailyClosingModal() {
+        const todayIso = new Date().toISOString().slice(0, 10);
+        const bodyHtml = `
+            <div class="form-group">
+                <label>စာရင်းပိတ်မည့် ရက်စွဲ</label>
+                <input type="date" id="closingDateInput" value="${todayIso}" onchange="renderDailyClosingSummary()">
+            </div>
+            <div id="closingSummaryContent" class="closing-summary-box"></div>
+        `;
+        const footerHtml = `
+            <button type="button" class="pdf-btn btn-del" onclick="closeActionModal()">ပိတ်မည်</button>
+            <button type="button" class="pdf-btn btn-view" onclick="copyDailyClosingText()"><i class="fas fa-copy"></i> ကူးယူမည်</button>
+        `;
+        openActionModal("နေ့စဉ် ငွေစာရင်းပိတ် အနှစ်ချုပ်", bodyHtml, footerHtml);
+        renderDailyClosingSummary();
+    }
+
+    function getDailyClosingStats(isoDate) {
+        const dayRows = history.filter(h => h.isoDate === isoDate);
+        let grossSales = 0;
+        let collectedTotal = 0;
+        let dueTotal = 0;
+        const byPay = {};
+
+        dayRows.forEach(h => {
+            const total = Number(h.total) || 0;
+            const collected = getVoucherCollectedAmount(h);
+            const due = getVoucherDueAmount(h);
+            const pay = (h.pay || 'Cash').trim() || 'Cash';
+
+            grossSales += total;
+            collectedTotal += collected;
+            dueTotal += due;
+            byPay[pay] = (byPay[pay] || 0) + collected;
+        });
+
+        return { isoDate, count: dayRows.length, grossSales, collectedTotal, dueTotal, byPay };
+    }
+
+    function renderDailyClosingSummary() {
+        const isoDate = document.getElementById('closingDateInput')?.value || new Date().toISOString().slice(0, 10);
+        const st = getDailyClosingStats(isoDate);
+        const box = document.getElementById('closingSummaryContent');
+        if (!box) return;
+
+        const payLines = Object.keys(st.byPay).length
+            ? Object.entries(st.byPay).map(([k, v]) => `<div>• ${k}: <b>${v.toLocaleString()} KS</b></div>`).join('')
+            : `<div style="color:var(--muted);">• ဝင်ငွေမှတ်တမ်း မရှိပါ။</div>`;
+
+        box.innerHTML = `
+            <div><b>ရက်စွဲ:</b> ${st.isoDate} | <b>ဘောင်ချာ:</b> ${st.count} စောင်</div>
+            <div><b>စုစုပေါင်း ရောင်းရငွေ:</b> <b>${st.grossSales.toLocaleString()} KS</b></div>
+            <div><b>လက်တွေ့ကောက်ခံရရှိငွေ:</b> <b style="color:var(--success);">${st.collectedTotal.toLocaleString()} KS</b></div>
+            <div><b>ကျန်အကြွေးငွေ:</b> <b style="color:var(--danger);">${st.dueTotal.toLocaleString()} KS</b></div>
+            <div style="margin-top:6px;"><b>ငွေပေးချေမှုအလိုက် လက်ဝင်ငွေ:</b></div>
+            ${payLines}
+        `;
+    }
+
+    function copyDailyClosingText() {
+        const isoDate = document.getElementById('closingDateInput')?.value || new Date().toISOString().slice(0, 10);
+        const st = getDailyClosingStats(isoDate);
+        const payText = Object.entries(st.byPay).map(([k, v]) => `- ${k}: ${v.toLocaleString()} KS`).join('\n') || '- မှတ်တမ်းမရှိပါ';
+        const summary = [
+            `${shopSettings.name} - နေ့စဉ်စာရင်းပိတ် (${st.isoDate})`,
+            `ဘောင်ချာအရေအတွက်: ${st.count} စောင်`,
+            `စုစုပေါင်း ရောင်းရငွေ: ${st.grossSales.toLocaleString()} KS`,
+            `လက်တွေ့ကောက်ခံရရှိငွေ: ${st.collectedTotal.toLocaleString()} KS`,
+            `ကျန်အကြွေးငွေ: ${st.dueTotal.toLocaleString()} KS`,
+            `ငွေပေးချေမှုအလိုက်:`,
+            payText
+        ].join('\n');
+
+        navigator.clipboard?.writeText(summary).then(() => {
+            alert("နေ့စဉ်စာရင်းပိတ် အနှစ်ချုပ်ကို ကူးယူပြီးပါပြီ။");
+        }).catch(() => {
+            alert(summary);
+        });
     }
 
     function closeVoucher() {
@@ -1547,9 +1904,12 @@
         const tbody = document.getElementById('topCustomersBody');
         if (!tbody) return;
 
-        const list = Object.values(customersData || {}).sort((a, b) => (b.totalSpent || 0) - (a.totalSpent || 0));
+        const list = Object.entries(customersData || {})
+            .map(([key, c]) => ({ key, ...c }))
+            .sort((a, b) => (b.totalSpent || 0) - (a.totalSpent || 0));
+
         if (!list.length) {
-            tbody.innerHTML = `<tr><td colspan="5" style="color:var(--muted); text-align:center;">Customer မှတ်တမ်း မရှိသေးပါ။ ဝယ်ယူသူအမည် သို့မဟုတ် ဖုန်းထည့်ပြီး ဘောင်ချာထုတ်ပါ။</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="color:var(--muted); text-align:center;">Customer မှတ်တမ်း မရှိသေးပါ။ ဝယ်ယူသူအမည် သို့မဟုတ် ဖုန်းထည့်ပြီး ဘောင်ချာထုတ်ပါ။</td></tr>`;
             return;
         }
 
@@ -1563,6 +1923,7 @@
                 <td>${c.orders || 0} ကြိမ်</td>
                 <td><b style="color:var(--primary);">${Number(c.totalSpent || 0).toLocaleString()} KS</b></td>
                 <td><span class="point-badge">${Number(c.points || 0).toLocaleString()} pts</span></td>
+                <td><button type="button" class="btn-mini-view" onclick="openCustomerDetailModal('${encodeURIComponent(c.key)}')"><i class="fas fa-list"></i> ကြည့်မည်</button></td>
             </tr>
         `).join('');
     }
@@ -1631,9 +1992,12 @@
                         <span>${h.cName ? 'ဝယ်သူ: ' + h.cName + ' • ' : ''}${h.pay || 'Cash'}</span>
                         ${badgeHtml}
                     </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
                         <b style="color:var(--primary); font-size:1.05rem;">${Number(h.total).toLocaleString()} KS</b>
-                        <button class="pdf-btn btn-view" onclick="viewHistoryVoucher(${idx})"><i class="fas fa-eye"></i> ကြည့်မည်</button>
+                        <div style="display:flex; gap:6px;">
+                            <button class="pdf-btn btn-edit" onclick="openEditVoucherModal(${idx})"><i class="fas fa-edit"></i> ပြင်မည်</button>
+                            <button class="pdf-btn btn-view" onclick="viewHistoryVoucher(${idx})"><i class="fas fa-eye"></i> ကြည့်မည်</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1660,6 +2024,7 @@
                     <div style="font-size:0.8rem; color:var(--muted);">${h.date} • ${Number(h.total).toLocaleString()} KS</div>
                 </div>
                 <div class="pdf-actions">
+                    <button class="pdf-btn btn-edit" onclick="openEditVoucherModal(${idx})"><i class="fas fa-edit"></i> ပြင်မည်</button>
                     <button class="pdf-btn btn-view" onclick="viewHistoryVoucher(${idx})"><i class="fas fa-print"></i> ဖွင့်မည်</button>
                     <button class="pdf-btn btn-del" onclick="deleteHistoryVoucher(${idx})"><i class="fas fa-trash"></i></button>
                 </div>
@@ -1670,7 +2035,7 @@
     function deleteHistoryVoucher(idx) {
         if (!confirm("ဒီ Voucher မှတ်တမ်းကို ဖျက်မှာ သေချာပါသလား?")) return;
         history.splice(idx, 1);
-        localStorage.setItem('min_history', JSON.stringify(history));
+        recalculateCustomersFromHistory();
         renderPdfList();
         renderHistory();
     }
@@ -1755,6 +2120,7 @@
     }
 
     // Initial load
+    recalculateCustomersFromHistory();
     initPOS();
 </script>
 </body>
